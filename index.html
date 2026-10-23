@@ -1,0 +1,2659 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIwNzk2NTUzMTcyNDYwMjQ5NTIyNSIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjX2NhODgyMDViZTk3OTY2OWFfaW5kZXguaHRtbC05NDEifSwiZXhwIjoxNzkyNzg0MTg3LCJpYXQiOjE3OTI3ODA1ODcsImFsZyI6IlJTMjU2In0.jgNQWlSwesYI84f4ZKWMKoR0A6LXC0Q478C3paF4mGeL8nyeNdOuDEo6UMu2NgkageLzvZmJUXMJqfvHuyx1p82HdyqpaWNLZTxjKGuBAdAV91OqJ-bB99gklCQGvlJIIT3gCBU9YTF6FZR1dIcMkavpCYsp2mpCReDVuLKuURpyy4J_LRyj1E5pcDhcm7SfyMbrWcE4K1UZ6XsQaHKzS9UZIoDcY8kPwuObUNqZKv91AMon9f8Asdens60Y9FoHzWR3QapQ8_v3eif0KbEPgLanPscuwvPHSgJbbNe0OEBw1tnub33Hyxx4MOvSRTSBsZCvl9-yoTfUhwdv-Y1iTw","c_ca88205be979669a_index.html-941")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>L'Atelier des Envies — Ma Liste de Cadeaux</title>
+  <meta name="description" content="Ma liste de cadeaux interactive pour Noël et Anniversaire.">
+  <meta name="theme-color" content="#FAF8F5" id="theme-color-meta">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Plus Jakarta Sans & Instrument Serif -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Instrument Serif"', ' Georgia', 'serif'],
+          },
+          colors: {
+            cream: '#FAF8F5',
+            paper: '#F3EFEA',
+            obsidian: '#0F1115',
+            charcoal: '#181B22',
+            charcoalLight: '#222631',
+            amberGold: '#D97706',
+            burgundy: '#BE123C',
+            pine: '#0F5132',
+            pineLight: '#198754'
+          },
+          boxShadow: {
+            'editorial': '0 12px 32px -8px rgba(24, 24, 27, 0.06), 0 4px 12px -2px rgba(24, 24, 27, 0.04)',
+            'editorial-dark': '0 12px 32px -8px rgba(0, 0, 0, 0.45), 0 4px 12px -2px rgba(0, 0, 0, 0.3)',
+            'dock': '0 20px 40px -12px rgba(15, 17, 21, 0.18), 0 0 1px 1px rgba(15, 17, 21, 0.06)',
+            'dock-dark': '0 20px 40px -12px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.08)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Masquer les barres de défilement horizontales tout en gardant le scroll tactile */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Animations fluides pour les tiroirs mobiles (Bottom Sheets) */
+    .sheet-backdrop {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .sheet-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .bottom-sheet {
+      transform: translateY(100%);
+      transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .bottom-sheet.active {
+      transform: translateY(0);
+    }
+
+    /* Effet de brillance subtil sur le bouton central + */
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 8px 24px -4px rgba(190, 18, 60, 0.55); }
+      50% { box-shadow: 0 12px 28px -2px rgba(217, 119, 6, 0.65); }
+    }
+    .fab-glow {
+      animation: pulseGlow 4s infinite ease-in-out;
+    }
+
+    /* Micro-interactions sur les cartes */
+    .gift-card {
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .gift-card:active {
+      transform: scale(0.985);
+    }
+    @media (hover: hover) {
+      .gift-card:hover {
+        transform: translateY(-4px);
+      }
+    }
+
+    /* Fond texturé éditorial léger */
+    .bg-editorial-pattern {
+      background-image: radial-gradient(rgba(217, 119, 6, 0.07) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    .dark .bg-editorial-pattern {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    }
+  </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:"Plus Jakarta Sans", sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.pointer-events-auto{pointer-events:auto}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0px}.inset-x-0{left:0px;right:0px}.inset-x-3{left:0.75rem;right:0.75rem}.bottom-0{bottom:0px}.bottom-4{bottom:1rem}.left-1\/2{left:50%}.left-4{left:1rem}.right-3{right:0.75rem}.right-3\.5{right:0.875rem}.right-5{right:1.25rem}.top-0{top:0px}.top-1\/2{top:50%}.top-3{top:0.75rem}.top-5{top:1.25rem}.bottom-3{bottom:0.75rem}.z-10{z-index:10}.z-30{z-index:30}.z-40{z-index:40}.z-50{z-index:50}.-mx-4{margin-left:-1rem;margin-right:-1rem}.mx-auto{margin-left:auto;margin-right:auto}.my-4{margin-top:1rem;margin-bottom:1rem}.-mt-6{margin-top:-1.5rem}.mb-0\.5{margin-bottom:0.125rem}.mb-1{margin-bottom:0.25rem}.mb-1\.5{margin-bottom:0.375rem}.mb-2{margin-bottom:0.5rem}.mb-2\.5{margin-bottom:0.625rem}.mb-3{margin-bottom:0.75rem}.mb-3\.5{margin-bottom:0.875rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.mb-6{margin-bottom:1.5rem}.mt-1\.5{margin-top:0.375rem}.mt-3{margin-top:0.75rem}.line-clamp-2{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-1\.5{height:0.375rem}.h-10{height:2.5rem}.h-12{height:3rem}.h-14{height:3.5rem}.h-16{height:4rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-6{height:1.5rem}.h-7{height:1.75rem}.h-8{height:2rem}.h-60{height:15rem}.h-9{height:2.25rem}.h-full{height:100%}.max-h-\[55vh\]{max-height:55vh}.max-h-\[90vh\]{max-height:90vh}.max-h-\[92vh\]{max-height:92vh}.min-h-screen{min-height:100vh}.w-1\/3{width:33.333333%}.w-10{width:2.5rem}.w-12{width:3rem}.w-14{width:3.5rem}.w-16{width:4rem}.w-2\/3{width:66.666667%}.w-4{width:1rem}.w-5{width:1.25rem}.w-6{width:1.5rem}.w-7{width:1.75rem}.w-8{width:2rem}.w-full{width:100%}.w-9{width:2.25rem}.max-w-5xl{max-width:64rem}.max-w-md{max-width:28rem}.max-w-sm{max-width:24rem}.max-w-xl{max-width:36rem}.max-w-\[60\%\]{max-width:60%}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.-translate-x-1\/2{--tw-translate-x:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.-translate-y-1\/2{--tw-translate-y:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.-translate-y-4{--tw-translate-y:-1rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.list-inside{list-style-position:inside}.list-decimal{list-style-type:decimal}.appearance-none{-webkit-appearance:none;appearance:none}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.items-baseline{align-items:baseline}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-2\.5{gap:0.625rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-5{gap:1.25rem}.gap-1{gap:0.25rem}.space-y-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.375rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.scroll-smooth{scroll-behavior:smooth}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-\[28px\]{border-radius:28px}.rounded-full{border-radius:9999px}.rounded-xl{border-radius:0.75rem}.rounded-\[24px\]{border-radius:24px}.rounded-t-\[32px\]{border-top-left-radius:32px;border-top-right-radius:32px}.border{border-width:1px}.border-4{border-width:4px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-amberGold\/20{border-color:rgb(217 119 6 / 0.2)}.border-amberGold\/25{border-color:rgb(217 119 6 / 0.25)}.border-burgundy\/25{border-color:rgb(190 18 60 / 0.25)}.border-cream{--tw-border-opacity:1;border-color:rgb(250 248 245 / var(--tw-border-opacity, 1))}.border-pine\/25{border-color:rgb(15 81 50 / 0.25)}.border-white\/10{border-color:rgb(255 255 255 / 0.1)}.border-zinc-100{--tw-border-opacity:1;border-color:rgb(244 244 245 / var(--tw-border-opacity, 1))}.border-zinc-200{--tw-border-opacity:1;border-color:rgb(228 228 231 / var(--tw-border-opacity, 1))}.border-zinc-200\/70{border-color:rgb(228 228 231 / 0.7)}.border-zinc-200\/80{border-color:rgb(228 228 231 / 0.8)}.border-zinc-300{--tw-border-opacity:1;border-color:rgb(212 212 216 / var(--tw-border-opacity, 1))}.border-emerald-500\/20{border-color:rgb(16 185 129 / 0.2)}.bg-cream{--tw-bg-opacity:1;background-color:rgb(250 248 245 / var(--tw-bg-opacity, 1))}.bg-amberGold{--tw-bg-opacity:1;background-color:rgb(217 119 6 / var(--tw-bg-opacity, 1))}.bg-amberGold\/10{background-color:rgb(217 119 6 / 0.1)}.bg-black\/60{background-color:rgb(0 0 0 / 0.6)}.bg-burgundy{--tw-bg-opacity:1;background-color:rgb(190 18 60 / var(--tw-bg-opacity, 1))}.bg-burgundy\/10{background-color:rgb(190 18 60 / 0.1)}.bg-pine{--tw-bg-opacity:1;background-color:rgb(15 81 50 / var(--tw-bg-opacity, 1))}.bg-pine\/10{background-color:rgb(15 81 50 / 0.1)}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-white\/60{background-color:rgb(255 255 255 / 0.6)}.bg-white\/80{background-color:rgb(255 255 255 / 0.8)}.bg-white\/85{background-color:rgb(255 255 255 / 0.85)}.bg-white\/90{background-color:rgb(255 255 255 / 0.9)}.bg-white\/95{background-color:rgb(255 255 255 / 0.95)}.bg-zinc-100{--tw-bg-opacity:1;background-color:rgb(244 244 245 / var(--tw-bg-opacity, 1))}.bg-zinc-200{--tw-bg-opacity:1;background-color:rgb(228 228 231 / var(--tw-bg-opacity, 1))}.bg-zinc-200\/80{background-color:rgb(228 228 231 / 0.8)}.bg-zinc-300{--tw-bg-opacity:1;background-color:rgb(212 212 216 / var(--tw-bg-opacity, 1))}.bg-zinc-50{--tw-bg-opacity:1;background-color:rgb(250 250 250 / var(--tw-bg-opacity, 1))}.bg-zinc-800{--tw-bg-opacity:1;background-color:rgb(39 39 42 / var(--tw-bg-opacity, 1))}.bg-zinc-900{--tw-bg-opacity:1;background-color:rgb(24 24 27 / var(--tw-bg-opacity, 1))}.bg-amberGold\/95{background-color:rgb(217 119 6 / 0.95)}.bg-black\/40{background-color:rgb(0 0 0 / 0.4)}.bg-black\/55{background-color:rgb(0 0 0 / 0.55)}.bg-burgundy\/90{background-color:rgb(190 18 60 / 0.9)}.bg-emerald-500\/10{background-color:rgb(16 185 129 / 0.1)}.bg-emerald-600{--tw-bg-opacity:1;background-color:rgb(5 150 105 / var(--tw-bg-opacity, 1))}.bg-emerald-950\/45{background-color:rgb(2 44 34 / 0.45)}.bg-paper{--tw-bg-opacity:1;background-color:rgb(243 239 234 / var(--tw-bg-opacity, 1))}.bg-pine\/90{background-color:rgb(15 81 50 / 0.9)}.bg-zinc-900\/85{background-color:rgb(24 24 27 / 0.85)}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.bg-gradient-to-tr{background-image:linear-gradient(to top right, var(--tw-gradient-stops))}.bg-gradient-to-t{background-image:linear-gradient(to top, var(--tw-gradient-stops))}.from-burgundy{--tw-gradient-from:#BE123C var(--tw-gradient-from-position);--tw-gradient-to:rgb(190 18 60 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-pine{--tw-gradient-from:#0F5132 var(--tw-gradient-from-position);--tw-gradient-to:rgb(15 81 50 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-black\/50{--tw-gradient-from:rgb(0 0 0 / 0.5) var(--tw-gradient-from-position);--tw-gradient-to:rgb(0 0 0 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.via-amberGold{--tw-gradient-to:rgb(217 119 6 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #D97706 var(--tw-gradient-via-position), var(--tw-gradient-to)}.via-emerald-700{--tw-gradient-to:rgb(4 120 87 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #047857 var(--tw-gradient-via-position), var(--tw-gradient-to)}.via-rose-600{--tw-gradient-to:rgb(225 29 72 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #e11d48 var(--tw-gradient-via-position), var(--tw-gradient-to)}.via-transparent{--tw-gradient-to:rgb(0 0 0 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), transparent var(--tw-gradient-via-position), var(--tw-gradient-to)}.to-amberGold{--tw-gradient-to:#D97706 var(--tw-gradient-to-position)}.to-burgundy{--tw-gradient-to:#BE123C var(--tw-gradient-to-position)}.to-pine{--tw-gradient-to:#0F5132 var(--tw-gradient-to-position)}.to-black\/15{--tw-gradient-to:rgb(0 0 0 / 0.15) var(--tw-gradient-to-position)}.object-cover{object-fit:cover}.object-center{object-position:center}.p-3{padding:0.75rem}.p-3\.5{padding:0.875rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.p-5{padding:1.25rem}.px-1\.5{padding-left:0.375rem;padding-right:0.375rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-16{padding-top:4rem;padding-bottom:4rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-3\.5{padding-top:0.875rem;padding-bottom:0.875rem}.py-4{padding-top:1rem;padding-bottom:1rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.pb-32{padding-bottom:8rem}.pb-2{padding-bottom:0.5rem}.pb-3{padding-bottom:0.75rem}.pl-11{padding-left:2.75rem}.pl-4{padding-left:1rem}.pr-9{padding-right:2.25rem}.pt-1{padding-top:0.25rem}.pt-2{padding-top:0.5rem}.pt-3{padding-top:0.75rem}.pt-4{padding-top:1rem}.pt-5{padding-top:1.25rem}.pt-0{padding-top:0px}.text-left{text-align:left}.text-center{text-align:center}.font-sans{font-family:"Plus Jakarta Sans", sans-serif}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.font-serif{font-family:"Instrument Serif",  Georgia, serif}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xs{font-size:0.75rem;line-height:1rem}.text-\[9px\]{font-size:9px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.font-extrabold{font-weight:800}.uppercase{text-transform:uppercase}.italic{font-style:italic}.leading-none{line-height:1}.leading-relaxed{line-height:1.625}.leading-tight{line-height:1.25}.leading-snug{line-height:1.375}.tracking-tight{letter-spacing:-0.025em}.tracking-wide{letter-spacing:0.025em}.tracking-wider{letter-spacing:0.05em}.text-zinc-900{--tw-text-opacity:1;color:rgb(24 24 27 / var(--tw-text-opacity, 1))}.text-amber-400{--tw-text-opacity:1;color:rgb(251 191 36 / var(--tw-text-opacity, 1))}.text-amberGold{--tw-text-opacity:1;color:rgb(217 119 6 / var(--tw-text-opacity, 1))}.text-burgundy{--tw-text-opacity:1;color:rgb(190 18 60 / var(--tw-text-opacity, 1))}.text-emerald-600{--tw-text-opacity:1;color:rgb(5 150 105 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-zinc-400{--tw-text-opacity:1;color:rgb(161 161 170 / var(--tw-text-opacity, 1))}.text-zinc-500{--tw-text-opacity:1;color:rgb(113 113 122 / var(--tw-text-opacity, 1))}.text-zinc-600{--tw-text-opacity:1;color:rgb(82 82 91 / var(--tw-text-opacity, 1))}.text-zinc-700{--tw-text-opacity:1;color:rgb(63 63 70 / var(--tw-text-opacity, 1))}.text-zinc-800{--tw-text-opacity:1;color:rgb(39 39 42 / var(--tw-text-opacity, 1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87 / var(--tw-text-opacity, 1))}.underline{-webkit-text-decoration-line:underline;text-decoration-line:underline}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.placeholder-zinc-400::placeholder{--tw-placeholder-opacity:1;color:rgb(161 161 170 / var(--tw-placeholder-opacity, 1))}.opacity-0{opacity:0}.opacity-75{opacity:0.75}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-dock{--tw-shadow:0 20px 40px -12px rgba(15, 17, 21, 0.18), 0 0 1px 1px rgba(15, 17, 21, 0.06);--tw-shadow-colored:0 20px 40px -12px var(--tw-shadow-color), 0 0 1px 1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-editorial{--tw-shadow:0 12px 32px -8px rgba(24, 24, 27, 0.06), 0 4px 12px -2px rgba(24, 24, 27, 0.04);--tw-shadow-colored:0 12px 32px -8px var(--tw-shadow-color), 0 4px 12px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-xl{--tw-backdrop-blur:blur(24px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-\[2px\]{--tw-backdrop-blur:blur(2px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.duration-500{transition-duration:500ms}.ease-out{transition-timing-function:cubic-bezier(0, 0, 0.2, 1)}.selection\:bg-burgundy *::selection{--tw-bg-opacity:1;background-color:rgb(190 18 60 / var(--tw-bg-opacity, 1))}.selection\:text-white *::selection{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.selection\:bg-burgundy::selection{--tw-bg-opacity:1;background-color:rgb(190 18 60 / var(--tw-bg-opacity, 1))}.selection\:text-white::selection{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:scale-\[1\.01\]:hover{--tw-scale-x:1.01;--tw-scale-y:1.01;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:bg-zinc-200:hover{--tw-bg-opacity:1;background-color:rgb(228 228 231 / var(--tw-bg-opacity, 1))}.hover\:bg-emerald-500\/20:hover{background-color:rgb(16 185 129 / 0.2)}.hover\:bg-zinc-200\/70:hover{background-color:rgb(228 228 231 / 0.7)}.hover\:text-burgundy:hover{--tw-text-opacity:1;color:rgb(190 18 60 / var(--tw-text-opacity, 1))}.hover\:text-zinc-900:hover{--tw-text-opacity:1;color:rgb(24 24 27 / var(--tw-text-opacity, 1))}.hover\:underline:hover{-webkit-text-decoration-line:underline;text-decoration-line:underline}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-amberGold:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(217 119 6 / var(--tw-ring-opacity, 1))}.focus\:ring-amberGold\/50:focus{--tw-ring-color:rgb(217 119 6 / 0.5)}.active\:scale-90:active{--tw-scale-x:.9;--tw-scale-y:.9;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.active\:scale-95:active{--tw-scale-x:.95;--tw-scale-y:.95;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.group:hover .group-hover\:scale-105{--tw-scale-x:1.05;--tw-scale-y:1.05;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.group:hover .group-hover\:scale-110{--tw-scale-x:1.1;--tw-scale-y:1.1;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.dark\:border-obsidian:is(.dark *){--tw-border-opacity:1;border-color:rgb(15 17 21 / var(--tw-border-opacity, 1))}.dark\:border-zinc-700:is(.dark *){--tw-border-opacity:1;border-color:rgb(63 63 70 / var(--tw-border-opacity, 1))}.dark\:border-zinc-700\/70:is(.dark *){border-color:rgb(63 63 70 / 0.7)}.dark\:border-zinc-800:is(.dark *){--tw-border-opacity:1;border-color:rgb(39 39 42 / var(--tw-border-opacity, 1))}.dark\:border-zinc-800\/80:is(.dark *){border-color:rgb(39 39 42 / 0.8)}.dark\:border-zinc-800\/90:is(.dark *){border-color:rgb(39 39 42 / 0.9)}.dark\:bg-obsidian:is(.dark *){--tw-bg-opacity:1;background-color:rgb(15 17 21 / var(--tw-bg-opacity, 1))}.dark\:bg-amberGold\/15:is(.dark *){background-color:rgb(217 119 6 / 0.15)}.dark\:bg-amberGold\/20:is(.dark *){background-color:rgb(217 119 6 / 0.2)}.dark\:bg-burgundy\/20:is(.dark *){background-color:rgb(190 18 60 / 0.2)}.dark\:bg-charcoal:is(.dark *){--tw-bg-opacity:1;background-color:rgb(24 27 34 / var(--tw-bg-opacity, 1))}.dark\:bg-charcoal\/50:is(.dark *){background-color:rgb(24 27 34 / 0.5)}.dark\:bg-charcoal\/80:is(.dark *){background-color:rgb(24 27 34 / 0.8)}.dark\:bg-charcoal\/90:is(.dark *){background-color:rgb(24 27 34 / 0.9)}.dark\:bg-charcoal\/95:is(.dark *){background-color:rgb(24 27 34 / 0.95)}.dark\:bg-pine\/20:is(.dark *){background-color:rgb(15 81 50 / 0.2)}.dark\:bg-white:is(.dark *){--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.dark\:bg-zinc-700:is(.dark *){--tw-bg-opacity:1;background-color:rgb(63 63 70 / var(--tw-bg-opacity, 1))}.dark\:bg-zinc-800:is(.dark *){--tw-bg-opacity:1;background-color:rgb(39 39 42 / var(--tw-bg-opacity, 1))}.dark\:bg-zinc-800\/80:is(.dark *){background-color:rgb(39 39 42 / 0.8)}.dark\:bg-charcoal\/85:is(.dark *){background-color:rgb(24 27 34 / 0.85)}.dark\:bg-charcoalLight:is(.dark *){--tw-bg-opacity:1;background-color:rgb(34 38 49 / var(--tw-bg-opacity, 1))}.dark\:bg-obsidian\/95:is(.dark *){background-color:rgb(15 17 21 / 0.95)}.dark\:text-zinc-100:is(.dark *){--tw-text-opacity:1;color:rgb(244 244 245 / var(--tw-text-opacity, 1))}.dark\:text-amberGold:is(.dark *){--tw-text-opacity:1;color:rgb(217 119 6 / var(--tw-text-opacity, 1))}.dark\:text-emerald-400:is(.dark *){--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity, 1))}.dark\:text-rose-400:is(.dark *){--tw-text-opacity:1;color:rgb(251 113 133 / var(--tw-text-opacity, 1))}.dark\:text-white:is(.dark *){--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.dark\:text-zinc-200:is(.dark *){--tw-text-opacity:1;color:rgb(228 228 231 / var(--tw-text-opacity, 1))}.dark\:text-zinc-300:is(.dark *){--tw-text-opacity:1;color:rgb(212 212 216 / var(--tw-text-opacity, 1))}.dark\:text-zinc-400:is(.dark *){--tw-text-opacity:1;color:rgb(161 161 170 / var(--tw-text-opacity, 1))}.dark\:text-zinc-900:is(.dark *){--tw-text-opacity:1;color:rgb(24 24 27 / var(--tw-text-opacity, 1))}.dark\:shadow-dock-dark:is(.dark *){--tw-shadow:0 20px 40px -12px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.08);--tw-shadow-colored:0 20px 40px -12px var(--tw-shadow-color), 0 0 1px 1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.dark\:shadow-editorial-dark:is(.dark *){--tw-shadow:0 12px 32px -8px rgba(0, 0, 0, 0.45), 0 4px 12px -2px rgba(0, 0, 0, 0.3);--tw-shadow-colored:0 12px 32px -8px var(--tw-shadow-color), 0 4px 12px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.dark\:hover\:bg-zinc-700:hover:is(.dark *){--tw-bg-opacity:1;background-color:rgb(63 63 70 / var(--tw-bg-opacity, 1))}.dark\:hover\:text-white:hover:is(.dark *){--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}@media (min-width: 640px){.sm\:col-span-2{grid-column:span 2 / span 2}.sm\:mx-0{margin-left:0px;margin-right:0px}.sm\:inline{display:inline}.sm\:h-60{height:15rem}.sm\:w-auto{width:auto}.sm\:flex-initial{flex:0 1 auto}.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.sm\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.sm\:grid-cols-8{grid-template-columns:repeat(8, minmax(0, 1fr))}.sm\:flex-row{flex-direction:row}.sm\:gap-4{gap:1rem}.sm\:px-0{padding-left:0px;padding-right:0px}.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}.sm\:text-3xl{font-size:1.875rem;line-height:2.25rem}.sm\:text-5xl{font-size:3rem;line-height:1}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}.sm\:text-xl{font-size:1.25rem;line-height:1.75rem}}@media (min-width: 1024px){.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}}</style></head>
+
+<body class="bg-cream dark:bg-obsidian text-zinc-900 dark:text-zinc-100 font-sans antialiased selection:bg-burgundy selection:text-white min-h-screen pb-32 transition-colors duration-300 bg-editorial-pattern">
+
+  <!-- Capture de la source HTML initiale avant modification du DOM pour l'export GitHub Pages 1-clic -->
+  <script>
+    window.__RAW_TEMPLATE_CAPTURE__ = null;
+    document.addEventListener('DOMContentLoaded', () => {
+      // On garde une empreinte propre pour la régénération du fichier index.html
+    });
+  </script>
+
+  <!-- Bandeau décoratif supérieur -->
+  <div class="h-1.5 w-full bg-gradient-to-r from-pine via-amberGold to-burgundy"></div>
+
+  <!-- Conteneur Principal -->
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 pt-5">
+
+    <!-- EN-TÊTE MOBILE IMMERSIF -->
+    <header class="relative mb-6">
+      <div class="flex items-start justify-between gap-3 mb-4">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amberGold/10 dark:bg-amberGold/15 border border-amberGold/20 text-amberGold text-xs font-semibold tracking-wide uppercase mb-2">
+            <span>✨ Édition Noël &amp; Anniversaire</span>
+          </div>
+          <h1 class="font-serif text-4xl sm:text-5xl tracking-tight text-zinc-900 dark:text-white leading-none">
+            Ma Liste <span class="italic font-normal text-burgundy dark:text-amberGold">d'Envies</span>
+          </h1>
+          <p class="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1.5">
+            Inspirations, coups de cœur &amp; idées cadeaux soigneusement choisis.
+          </p>
+        </div>
+
+        <!-- Actions rapides En-tête : Mode Sombre, Grille 1/2 col, Partager -->
+        <div class="flex items-center gap-2 shrink-0">
+          <!-- Bouton Bascule Grille 1 ou 2 colonnes (Mobile) -->
+          <button id="btn-grid-toggle" onclick="toggleMobileGrid()" title="Changer l'affichage (1 ou 2 colonnes)" class="w-10 h-10 rounded-2xl bg-white dark:bg-charcoal border border-zinc-200/80 dark:border-zinc-800 flex items-center justify-center text-zinc-700 dark:text-zinc-200 shadow-sm active:scale-95 transition">
+            <svg id="icon-grid-2" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect>
+              <rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect>
+            </svg>
+            <svg id="icon-grid-1" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="6" rx="2"></rect><rect x="3" y="14" width="18" height="6" rx="2"></rect>
+            </svg>
+          </button>
+
+          <!-- Bouton Mode Clair / Sombre -->
+          <button onclick="toggleDarkMode()" title="Basculer le thème Clair / Sombre" class="w-10 h-10 rounded-2xl bg-white dark:bg-charcoal border border-zinc-200/80 dark:border-zinc-800 flex items-center justify-center text-zinc-700 dark:text-zinc-200 shadow-sm active:scale-95 transition">
+            <!-- Soleil -->
+            <svg id="icon-sun" class="w-5 h-5 hidden text-amber-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+            </svg>
+            <!-- Lune -->
+            <svg id="icon-moon" class="w-5 h-5 text-zinc-700" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- COMPTEURS DYNAMIQUES (Bento Stats) -->
+      <div class="grid grid-cols-3 gap-2.5 sm:gap-4 mb-5">
+        <div class="bg-white/90 dark:bg-charcoal/90 backdrop-blur-md border border-zinc-200/70 dark:border-zinc-800/80 rounded-3xl p-3.5 shadow-editorial dark:shadow-editorial-dark">
+          <div class="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400 mb-1">
+            <span>Idées en liste</span>
+            <span class="text-base">🎁</span>
+          </div>
+          <div class="flex items-baseline gap-1.5">
+            <span id="stat-total-count" class="font-serif text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white">6</span>
+            <span id="stat-reserved-sub" class="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">1 réservé</span>
+          </div>
+        </div>
+
+        <div class="bg-white/90 dark:bg-charcoal/90 backdrop-blur-md border border-zinc-200/70 dark:border-zinc-800/80 rounded-3xl p-3.5 shadow-editorial dark:shadow-editorial-dark">
+          <div class="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400 mb-1">
+            <span>Budget moyen</span>
+            <span class="text-base">💶</span>
+          </div>
+          <div class="flex items-baseline gap-1.5">
+            <span id="stat-avg-price" class="font-serif text-2xl sm:text-3xl font-bold text-amberGold">118 €</span>
+            <span id="stat-total-price" class="text-[11px] text-zinc-400 hidden sm:inline">Total: 705€</span>
+          </div>
+        </div>
+
+        <div class="bg-white/90 dark:bg-charcoal/90 backdrop-blur-md border border-zinc-200/70 dark:border-zinc-800/80 rounded-3xl p-3.5 shadow-editorial dark:shadow-editorial-dark">
+          <div class="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400 mb-1">
+            <span>Coups de cœur</span>
+            <span class="text-base">🔥</span>
+          </div>
+          <div class="flex items-baseline gap-1.5">
+            <span id="stat-fav-count" class="font-serif text-2xl sm:text-3xl font-bold text-burgundy dark:text-rose-400">3</span>
+            <span class="text-[11px] text-zinc-400">prioritaires</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BARRE DE RECHERCHE & SÉLECTEUR DE TRI -->
+      <div class="flex flex-col sm:flex-row gap-2.5 mb-3.5">
+        <div class="relative flex-1">
+          <svg class="w-4 h-4 text-zinc-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
+          </svg>
+          <input type="text" id="search-input" oninput="handleSearch(this.value)" placeholder="Rechercher un cadeau, une marque, une note..." class="w-full pl-11 pr-9 py-3 rounded-2xl bg-white dark:bg-charcoal border border-zinc-200/80 dark:border-zinc-800 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-amberGold/50 shadow-sm transition">
+          <button id="btn-clear-search" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 flex items-center justify-center text-xs">
+            ✕
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <div class="relative flex-1 sm:flex-initial">
+            <select id="sort-select" onchange="handleSortChange(this.value)" aria-label="Trier les cadeaux" class="w-full sm:w-auto appearance-none pl-4 pr-9 py-3 rounded-2xl bg-white dark:bg-charcoal border border-zinc-200/80 dark:border-zinc-800 text-xs sm:text-sm font-medium text-zinc-700 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-amberGold/50 shadow-sm cursor-pointer">
+              <option value="priority">Trier : Priorité 🔥</option>
+              <option value="price-asc">Prix : Croissant ↑</option>
+              <option value="price-desc">Prix : Décroissant ↓</option>
+              <option value="newest">Plus récents ✨</option>
+            </select>
+            <svg class="w-4 h-4 text-zinc-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="m6 9 6 6 6-6"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- PILULES DE FILTRES HORIZONTALES DÉROULANTES AU DOIGT -->
+      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 -mx-4 px-4 sm:mx-0 sm:px-0" id="filter-pills-container">
+        <button onclick="setQuickFilter('all')" data-filter="all" class="filter-pill shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-sm">
+          Tous les cadeaux
+        </button>
+        <button onclick="setQuickFilter('noel')" data-filter="noel" class="filter-pill shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white dark:bg-charcoal text-zinc-700 dark:text-zinc-300 border border-zinc-200/80 dark:border-zinc-800">
+          🎄 Noël
+        </button>
+        <button onclick="setQuickFilter('anniversaire')" data-filter="anniversaire" class="filter-pill shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white dark:bg-charcoal text-zinc-700 dark:text-zinc-300 border border-zinc-200/80 dark:border-zinc-800">
+          🎂 Anniversaire
+        </button>
+        <button onclick="setQuickFilter('coup-de-coeur')" data-filter="coup-de-coeur" class="filter-pill shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white dark:bg-charcoal text-zinc-700 dark:text-zinc-300 border border-zinc-200/80 dark:border-zinc-800">
+          🔥 Coups de cœur
+        </button>
+        <button onclick="setQuickFilter('under-30')" data-filter="under-30" class="filter-pill shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white dark:bg-charcoal text-zinc-700 dark:text-zinc-300 border border-zinc-200/80 dark:border-zinc-800">
+          Moins de 30 €
+        </button>
+        <button onclick="setQuickFilter('30-80')" data-filter="30-80" class="filter-pill shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white dark:bg-charcoal text-zinc-700 dark:text-zinc-300 border border-zinc-200/80 dark:border-zinc-800">
+          30 € – 80 €
+        </button>
+        <button onclick="setQuickFilter('over-80')" data-filter="over-80" class="filter-pill shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white dark:bg-charcoal text-zinc-700 dark:text-zinc-300 border border-zinc-200/80 dark:border-zinc-800">
+          Plus de 80 €
+        </button>
+        <button onclick="setQuickFilter('reserved')" data-filter="reserved" class="filter-pill shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white dark:bg-charcoal text-zinc-700 dark:text-zinc-300 border border-zinc-200/80 dark:border-zinc-800">
+          ✓ Déjà réservé / offert
+        </button>
+      </div>
+
+      <!-- BANDEAU FILTRE PERSONNE ACTIF (affiché si filtré par destinataire) -->
+      <div id="active-recipient-banner" class="hidden mt-3 px-4 py-2.5 rounded-2xl bg-amberGold/10 dark:bg-amberGold/15 border border-amberGold/25 flex items-center justify-between">
+        <div class="flex items-center gap-2 text-xs font-semibold text-amberGold">
+          <span>👤 Destinataire filtré :</span>
+          <span id="active-recipient-name" class="underline font-bold">Pour Moi</span>
+        </div>
+        <button onclick="setRecipientFilter('all')" class="text-xs font-bold text-amberGold hover:underline">
+          Voir tout le monde ✕
+        </button>
+      </div>
+    </header>
+
+    <!-- GRILLE DES CARTES DE CADEAUX -->
+    <main>
+      <div id="gifts-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <article onclick="openDetailSheet('gift-1')" class="gift-card group cursor-pointer bg-white dark:bg-charcoal rounded-[24px] border border-zinc-200/80 dark:border-zinc-800/90 shadow-editorial dark:shadow-editorial-dark overflow-hidden flex flex-col justify-between relative ">
+            <div>
+              <!-- Photo du produit avec badges en glassmorphism -->
+              <div class="relative h-60 sm:h-60 w-full overflow-hidden bg-paper dark:bg-charcoalLight">
+                <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&amp;fit=crop&amp;w=900&amp;q=80" alt="Casque Audio Sans Fil à Réduction de Bruit" onerror="this.onerror=null; this.src='https://placehold.co/800x600/F3EFEA/D97706?text=Casque%20Audio%20Sans%20';" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out" loading="lazy">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/15 pointer-events-none"></div>
+
+                <!-- Badges Haut : Occasion + Priorité -->
+                <div class="absolute top-3 inset-x-3 flex items-center justify-between gap-1.5">
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md shadow-xs bg-pine/90 text-white">
+                    🎄 Noël
+                  </span>
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md shadow-xs bg-burgundy/90 text-white">
+                    Coup de cœur 🔥
+                  </span>
+                </div>
+
+                <!-- Ruban si Déjà Réservé / Offert -->
+                
+
+                <!-- Bas de l'image : Destinataire + Prix en surimpression -->
+                <div class="absolute bottom-3 inset-x-3 flex items-end justify-between gap-2">
+                  <span class="px-2.5 py-1 rounded-xl bg-black/55 backdrop-blur-md text-white text-[11px] font-semibold truncate max-w-[60%]">
+                    👤 Pour moi
+                  </span>
+                  <span class="px-3 py-1 rounded-2xl bg-white/95 dark:bg-obsidian/95 backdrop-blur-md text-zinc-900 dark:text-white font-serif text-lg sm:text-xl font-bold shadow-md">
+                    249 €
+                  </span>
+                </div>
+              </div>
+
+              <!-- Corps de la carte -->
+              <div class="p-5">
+                <div class="flex items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wider text-amberGold mb-1">
+                  <span class="truncate">Fnac / Sony</span>
+                </div>
+
+                <h2 class="font-serif text-xl line-clamp-2 text-zinc-900 dark:text-white leading-snug mb-1.5">
+                  Casque Audio Sans Fil à Réduction de Bruit
+                </h2>
+
+                
+                  <p class="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                    Coloris Beige Sable ou Argent Platine de préférence. Parfait pour le train et le télétravail.
+                  </p>
+                
+              </div>
+            </div>
+
+            <!-- Pied de carte : Actions directes -->
+            <div class="p-5 pt-0 flex items-center gap-2" onclick="event.stopPropagation()">
+              
+                <a href="https://www.fnac.com" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 px-3 rounded-xl bg-cream dark:bg-charcoalLight hover:bg-zinc-200/70 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 text-xs font-bold text-center transition truncate">
+                  Voir l'article ↗
+                </a>
+              
+
+              <button onclick="toggleReserveGift('gift-1')" title="Marquer comme réservé / acheté" class="py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20">
+                <span>✓</span>
+                <span class="">Réserver</span>
+              </button>
+
+              <button onclick="openFormSheet('gift-1')" title="Modifier ce cadeau" class="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-charcoalLight text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 flex items-center justify-center shrink-0 transition">
+                ✎
+              </button>
+            </div>
+          </article>
+        
+          <article onclick="openDetailSheet('gift-2')" class="gift-card group cursor-pointer bg-white dark:bg-charcoal rounded-[24px] border border-zinc-200/80 dark:border-zinc-800/90 shadow-editorial dark:shadow-editorial-dark overflow-hidden flex flex-col justify-between relative ">
+            <div>
+              <!-- Photo du produit avec badges en glassmorphism -->
+              <div class="relative h-60 sm:h-60 w-full overflow-hidden bg-paper dark:bg-charcoalLight">
+                <img src="https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?auto=format&amp;fit=crop&amp;w=900&amp;q=80" alt="Machine à Expresso Manuelle Style Barista" onerror="this.onerror=null; this.src='https://placehold.co/800x600/F3EFEA/D97706?text=Machine%20%C3%A0%20Expresso';" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out" loading="lazy">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/15 pointer-events-none"></div>
+
+                <!-- Badges Haut : Occasion + Priorité -->
+                <div class="absolute top-3 inset-x-3 flex items-center justify-between gap-1.5">
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md shadow-xs bg-pine/90 text-white">
+                    🎄 Noël
+                  </span>
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md shadow-xs bg-burgundy/90 text-white">
+                    Coup de cœur 🔥
+                  </span>
+                </div>
+
+                <!-- Ruban si Déjà Réservé / Offert -->
+                
+
+                <!-- Bas de l'image : Destinataire + Prix en surimpression -->
+                <div class="absolute bottom-3 inset-x-3 flex items-end justify-between gap-2">
+                  <span class="px-2.5 py-1 rounded-xl bg-black/55 backdrop-blur-md text-white text-[11px] font-semibold truncate max-w-[60%]">
+                    👤 Partenaire
+                  </span>
+                  <span class="px-3 py-1 rounded-2xl bg-white/95 dark:bg-obsidian/95 backdrop-blur-md text-zinc-900 dark:text-white font-serif text-lg sm:text-xl font-bold shadow-md">
+                    189 €
+                  </span>
+                </div>
+              </div>
+
+              <!-- Corps de la carte -->
+              <div class="p-5">
+                <div class="flex items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wider text-amberGold mb-1">
+                  <span class="truncate">MaxiCoffee</span>
+                </div>
+
+                <h2 class="font-serif text-xl line-clamp-2 text-zinc-900 dark:text-white leading-snug mb-1.5">
+                  Machine à Expresso Manuelle Style Barista
+                </h2>
+
+                
+                  <p class="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                    Finition inox brossé avec buse vapeur pour faire des latte art maison.
+                  </p>
+                
+              </div>
+            </div>
+
+            <!-- Pied de carte : Actions directes -->
+            <div class="p-5 pt-0 flex items-center gap-2" onclick="event.stopPropagation()">
+              
+                <a href="https://www.maxicoffee.com" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 px-3 rounded-xl bg-cream dark:bg-charcoalLight hover:bg-zinc-200/70 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 text-xs font-bold text-center transition truncate">
+                  Voir l'article ↗
+                </a>
+              
+
+              <button onclick="toggleReserveGift('gift-2')" title="Marquer comme réservé / acheté" class="py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20">
+                <span>✓</span>
+                <span class="">Réserver</span>
+              </button>
+
+              <button onclick="openFormSheet('gift-2')" title="Modifier ce cadeau" class="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-charcoalLight text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 flex items-center justify-center shrink-0 transition">
+                ✎
+              </button>
+            </div>
+          </article>
+        
+          <article onclick="openDetailSheet('gift-4')" class="gift-card group cursor-pointer bg-white dark:bg-charcoal rounded-[24px] border border-zinc-200/80 dark:border-zinc-800/90 shadow-editorial dark:shadow-editorial-dark overflow-hidden flex flex-col justify-between relative opacity-75">
+            <div>
+              <!-- Photo du produit avec badges en glassmorphism -->
+              <div class="relative h-60 sm:h-60 w-full overflow-hidden bg-paper dark:bg-charcoalLight">
+                <img src="https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&amp;fit=crop&amp;w=900&amp;q=80" alt="Lampe à Poser Design Champignon en Verre Opalin" onerror="this.onerror=null; this.src='https://placehold.co/800x600/F3EFEA/D97706?text=Lampe%20%C3%A0%20Poser%20Desi';" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out" loading="lazy">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/15 pointer-events-none"></div>
+
+                <!-- Badges Haut : Occasion + Priorité -->
+                <div class="absolute top-3 inset-x-3 flex items-center justify-between gap-1.5">
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md shadow-xs bg-amberGold/95 text-white">
+                    🎂 Anniversaire
+                  </span>
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md shadow-xs bg-burgundy/90 text-white">
+                    Coup de cœur 🔥
+                  </span>
+                </div>
+
+                <!-- Ruban si Déjà Réservé / Offert -->
+                
+                  <div class="absolute inset-0 bg-emerald-950/45 backdrop-blur-[2px] flex items-center justify-center">
+                    <span class="px-4 py-1.5 rounded-full bg-emerald-600 text-white text-xs font-extrabold tracking-wide uppercase shadow-lg">
+                      ✓ Réservé / Offert
+                    </span>
+                  </div>
+                
+
+                <!-- Bas de l'image : Destinataire + Prix en surimpression -->
+                <div class="absolute bottom-3 inset-x-3 flex items-end justify-between gap-2">
+                  <span class="px-2.5 py-1 rounded-xl bg-black/55 backdrop-blur-md text-white text-[11px] font-semibold truncate max-w-[60%]">
+                    👤 Pour moi
+                  </span>
+                  <span class="px-3 py-1 rounded-2xl bg-white/95 dark:bg-obsidian/95 backdrop-blur-md text-zinc-900 dark:text-white font-serif text-lg sm:text-xl font-bold shadow-md">
+                    68 €
+                  </span>
+                </div>
+              </div>
+
+              <!-- Corps de la carte -->
+              <div class="p-5">
+                <div class="flex items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wider text-amberGold mb-1">
+                  <span class="truncate">Smallable / Maisons du Monde</span>
+                </div>
+
+                <h2 class="font-serif text-xl line-clamp-2 text-zinc-900 dark:text-white leading-snug mb-1.5">
+                  Lampe à Poser Design Champignon en Verre Opalin
+                </h2>
+
+                
+                  <p class="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                    Lumière chaude tamisée pour le coin lecture du salon.
+                  </p>
+                
+              </div>
+            </div>
+
+            <!-- Pied de carte : Actions directes -->
+            <div class="p-5 pt-0 flex items-center gap-2" onclick="event.stopPropagation()">
+              
+                <a href="https://www.smallable.com" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 px-3 rounded-xl bg-cream dark:bg-charcoalLight hover:bg-zinc-200/70 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 text-xs font-bold text-center transition truncate">
+                  Voir l'article ↗
+                </a>
+              
+
+              <button onclick="toggleReserveGift('gift-4')" title="Marquer comme disponible" class="py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 bg-emerald-600 text-white">
+                <span>✓</span>
+                <span class="">Réservé</span>
+              </button>
+
+              <button onclick="openFormSheet('gift-4')" title="Modifier ce cadeau" class="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-charcoalLight text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 flex items-center justify-center shrink-0 transition">
+                ✎
+              </button>
+            </div>
+          </article>
+        
+          <article onclick="openDetailSheet('gift-3')" class="gift-card group cursor-pointer bg-white dark:bg-charcoal rounded-[24px] border border-zinc-200/80 dark:border-zinc-800/90 shadow-editorial dark:shadow-editorial-dark overflow-hidden flex flex-col justify-between relative ">
+            <div>
+              <!-- Photo du produit avec badges en glassmorphism -->
+              <div class="relative h-60 sm:h-60 w-full overflow-hidden bg-paper dark:bg-charcoalLight">
+                <img src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&amp;fit=crop&amp;w=900&amp;q=80" alt="Pull Col Rond en Laine Mérinos Écru" onerror="this.onerror=null; this.src='https://placehold.co/800x600/F3EFEA/D97706?text=Pull%20Col%20Rond%20en%20L';" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out" loading="lazy">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/15 pointer-events-none"></div>
+
+                <!-- Badges Haut : Occasion + Priorité -->
+                <div class="absolute top-3 inset-x-3 flex items-center justify-between gap-1.5">
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md shadow-xs bg-amberGold/95 text-white">
+                    🎂 Anniversaire
+                  </span>
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md shadow-xs bg-white/90 dark:bg-charcoal/90 text-zinc-900 dark:text-white">
+                    Très envie ✨
+                  </span>
+                </div>
+
+                <!-- Ruban si Déjà Réservé / Offert -->
+                
+
+                <!-- Bas de l'image : Destinataire + Prix en surimpression -->
+                <div class="absolute bottom-3 inset-x-3 flex items-end justify-between gap-2">
+                  <span class="px-2.5 py-1 rounded-xl bg-black/55 backdrop-blur-md text-white text-[11px] font-semibold truncate max-w-[60%]">
+                    👤 Pour moi
+                  </span>
+                  <span class="px-3 py-1 rounded-2xl bg-white/95 dark:bg-obsidian/95 backdrop-blur-md text-zinc-900 dark:text-white font-serif text-lg sm:text-xl font-bold shadow-md">
+                    115 €
+                  </span>
+                </div>
+              </div>
+
+              <!-- Corps de la carte -->
+              <div class="p-5">
+                <div class="flex items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wider text-amberGold mb-1">
+                  <span class="truncate">Sézane / Octobre</span>
+                </div>
+
+                <h2 class="font-serif text-xl line-clamp-2 text-zinc-900 dark:text-white leading-snug mb-1.5">
+                  Pull Col Rond en Laine Mérinos Écru
+                </h2>
+
+                
+                  <p class="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                    Taille M — Maille côtelée douce, coloris Écru naturel ou Vert Sauge.
+                  </p>
+                
+              </div>
+            </div>
+
+            <!-- Pied de carte : Actions directes -->
+            <div class="p-5 pt-0 flex items-center gap-2" onclick="event.stopPropagation()">
+              
+                <a href="https://www.sezane.com" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 px-3 rounded-xl bg-cream dark:bg-charcoalLight hover:bg-zinc-200/70 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 text-xs font-bold text-center transition truncate">
+                  Voir l'article ↗
+                </a>
+              
+
+              <button onclick="toggleReserveGift('gift-3')" title="Marquer comme réservé / acheté" class="py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20">
+                <span>✓</span>
+                <span class="">Réserver</span>
+              </button>
+
+              <button onclick="openFormSheet('gift-3')" title="Modifier ce cadeau" class="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-charcoalLight text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 flex items-center justify-center shrink-0 transition">
+                ✎
+              </button>
+            </div>
+          </article>
+        
+          <article onclick="openDetailSheet('gift-5')" class="gift-card group cursor-pointer bg-white dark:bg-charcoal rounded-[24px] border border-zinc-200/80 dark:border-zinc-800/90 shadow-editorial dark:shadow-editorial-dark overflow-hidden flex flex-col justify-between relative ">
+            <div>
+              <!-- Photo du produit avec badges en glassmorphism -->
+              <div class="relative h-60 sm:h-60 w-full overflow-hidden bg-paper dark:bg-charcoalLight">
+                <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&amp;fit=crop&amp;w=900&amp;q=80" alt="Beau Livre « Voyages &amp; Tables Méditerranéennes »" onerror="this.onerror=null; this.src='https://placehold.co/800x600/F3EFEA/D97706?text=Beau%20Livre%20%C2%AB%20Voyag';" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out" loading="lazy">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/15 pointer-events-none"></div>
+
+                <!-- Badges Haut : Occasion + Priorité -->
+                <div class="absolute top-3 inset-x-3 flex items-center justify-between gap-1.5">
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md shadow-xs bg-pine/90 text-white">
+                    🎄 Noël
+                  </span>
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md shadow-xs bg-white/90 dark:bg-charcoal/90 text-zinc-900 dark:text-white">
+                    Très envie ✨
+                  </span>
+                </div>
+
+                <!-- Ruban si Déjà Réservé / Offert -->
+                
+
+                <!-- Bas de l'image : Destinataire + Prix en surimpression -->
+                <div class="absolute bottom-3 inset-x-3 flex items-end justify-between gap-2">
+                  <span class="px-2.5 py-1 rounded-xl bg-black/55 backdrop-blur-md text-white text-[11px] font-semibold truncate max-w-[60%]">
+                    👤 Maman
+                  </span>
+                  <span class="px-3 py-1 rounded-2xl bg-white/95 dark:bg-obsidian/95 backdrop-blur-md text-zinc-900 dark:text-white font-serif text-lg sm:text-xl font-bold shadow-md">
+                    39 €
+                  </span>
+                </div>
+              </div>
+
+              <!-- Corps de la carte -->
+              <div class="p-5">
+                <div class="flex items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wider text-amberGold mb-1">
+                  <span class="truncate">Librairie de quartier</span>
+                </div>
+
+                <h2 class="font-serif text-xl line-clamp-2 text-zinc-900 dark:text-white leading-snug mb-1.5">
+                  Beau Livre « Voyages &amp; Tables Méditerranéennes »
+                </h2>
+
+                
+                  <p class="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                    Édition reliée grand format avec photographies ensoleillées et recettes familiales.
+                  </p>
+                
+              </div>
+            </div>
+
+            <!-- Pied de carte : Actions directes -->
+            <div class="p-5 pt-0 flex items-center gap-2" onclick="event.stopPropagation()">
+              
+                <a href="https://www.placedeslibraires.fr" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 px-3 rounded-xl bg-cream dark:bg-charcoalLight hover:bg-zinc-200/70 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 text-xs font-bold text-center transition truncate">
+                  Voir l'article ↗
+                </a>
+              
+
+              <button onclick="toggleReserveGift('gift-5')" title="Marquer comme réservé / acheté" class="py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20">
+                <span>✓</span>
+                <span class="">Réserver</span>
+              </button>
+
+              <button onclick="openFormSheet('gift-5')" title="Modifier ce cadeau" class="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-charcoalLight text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 flex items-center justify-center shrink-0 transition">
+                ✎
+              </button>
+            </div>
+          </article>
+        
+          <article onclick="openDetailSheet('gift-6')" class="gift-card group cursor-pointer bg-white dark:bg-charcoal rounded-[24px] border border-zinc-200/80 dark:border-zinc-800/90 shadow-editorial dark:shadow-editorial-dark overflow-hidden flex flex-col justify-between relative ">
+            <div>
+              <!-- Photo du produit avec badges en glassmorphism -->
+              <div class="relative h-60 sm:h-60 w-full overflow-hidden bg-paper dark:bg-charcoalLight">
+                <img src="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&amp;fit=crop&amp;w=900&amp;q=80" alt="Coffret Bougie Botanique &amp; Parfum d'Intérieur Ambré" onerror="this.onerror=null; this.src='https://placehold.co/800x600/F3EFEA/D97706?text=Coffret%20Bougie%20Bot';" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out" loading="lazy">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/15 pointer-events-none"></div>
+
+                <!-- Badges Haut : Occasion + Priorité -->
+                <div class="absolute top-3 inset-x-3 flex items-center justify-between gap-1.5">
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md shadow-xs bg-zinc-900/85 text-white">
+                    ✨ Noël &amp; Anniv.
+                  </span>
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md shadow-xs bg-white/85 dark:bg-charcoal/85 text-zinc-700 dark:text-zinc-200">
+                    Idée sympa 💡
+                  </span>
+                </div>
+
+                <!-- Ruban si Déjà Réservé / Offert -->
+                
+
+                <!-- Bas de l'image : Destinataire + Prix en surimpression -->
+                <div class="absolute bottom-3 inset-x-3 flex items-end justify-between gap-2">
+                  <span class="px-2.5 py-1 rounded-xl bg-black/55 backdrop-blur-md text-white text-[11px] font-semibold truncate max-w-[60%]">
+                    👤 Amis
+                  </span>
+                  <span class="px-3 py-1 rounded-2xl bg-white/95 dark:bg-obsidian/95 backdrop-blur-md text-zinc-900 dark:text-white font-serif text-lg sm:text-xl font-bold shadow-md">
+                    45 €
+                  </span>
+                </div>
+              </div>
+
+              <!-- Corps de la carte -->
+              <div class="p-5">
+                <div class="flex items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wider text-amberGold mb-1">
+                  <span class="truncate">Diptyque / Artisan Cirier</span>
+                </div>
+
+                <h2 class="font-serif text-xl line-clamp-2 text-zinc-900 dark:text-white leading-snug mb-1.5">
+                  Coffret Bougie Botanique &amp; Parfum d'Intérieur Ambré
+                </h2>
+
+                
+                  <p class="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                    Senteur figuier sauvage, cèdre ou fleur d'oranger. Cire 100% végétale.
+                  </p>
+                
+              </div>
+            </div>
+
+            <!-- Pied de carte : Actions directes -->
+            <div class="p-5 pt-0 flex items-center gap-2" onclick="event.stopPropagation()">
+              
+                <a href="https://www.diptyqueparis.com" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 px-3 rounded-xl bg-cream dark:bg-charcoalLight hover:bg-zinc-200/70 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 text-xs font-bold text-center transition truncate">
+                  Voir l'article ↗
+                </a>
+              
+
+              <button onclick="toggleReserveGift('gift-6')" title="Marquer comme réservé / acheté" class="py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20">
+                <span>✓</span>
+                <span class="">Réserver</span>
+              </button>
+
+              <button onclick="openFormSheet('gift-6')" title="Modifier ce cadeau" class="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-charcoalLight text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 flex items-center justify-center shrink-0 transition">
+                ✎
+              </button>
+            </div>
+          </article>
+        </div>
+
+      <!-- ÉTAT VIDE (Aucun résultat) -->
+      <div id="empty-state" class="hidden text-center py-16 px-4 bg-white/60 dark:bg-charcoal/50 rounded-3xl border border-dashed border-zinc-300 dark:border-zinc-800 my-4">
+        <div class="w-16 h-16 rounded-full bg-amberGold/10 text-amberGold flex items-center justify-center mx-auto mb-4 text-2xl">
+          ✨
+        </div>
+        <h3 class="font-serif text-2xl text-zinc-900 dark:text-white mb-1">Aucune idée trouvée</h3>
+        <p class="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto mb-5">
+          Aucun cadeau ne correspond à vos filtres actuels. Essayez d'élargir la recherche ou ajoutez une nouvelle envie !
+        </p>
+        <div class="flex items-center justify-center gap-3">
+          <button onclick="resetAllFilters()" class="px-4 py-2.5 rounded-2xl bg-zinc-200/80 dark:bg-zinc-800 text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+            Réinitialiser les filtres
+          </button>
+          <button onclick="openFormSheet()" class="px-4 py-2.5 rounded-2xl bg-burgundy text-white text-xs font-semibold shadow-sm">
+            + Ajouter un cadeau
+          </button>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- BARRE DE NAVIGATION FLOTTANTE EN BAS (BOTTOM DOCK GLASSMORPHISM) -->
+  <nav aria-label="Navigation principale" class="fixed bottom-4 inset-x-0 z-30 px-4 pointer-events-none flex justify-center">
+    <div class="pointer-events-auto w-full max-w-md bg-white/85 dark:bg-charcoal/90 backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-700/70 rounded-[28px] px-3 py-2 shadow-dock dark:shadow-dock-dark flex items-center justify-between">
+      
+      <!-- 1. Vitrine -->
+      <button onclick="switchDockTab('vitrine')" id="dock-vitrine" class="dock-btn flex flex-col items-center justify-center w-16 py-1 rounded-2xl text-burgundy dark:text-amberGold transition">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="9" rx="1.5"></rect><rect x="14" y="3" width="7" height="5" rx="1.5"></rect>
+          <rect x="14" y="12" width="7" height="9" rx="1.5"></rect><rect x="3" y="16" width="7" height="5" rx="1.5"></rect>
+        </svg>
+        <span class="text-[10px] font-bold tracking-tight">Vitrine</span>
+      </button>
+
+      <!-- 2. Occasions -->
+      <button onclick="openOccasionsSheet()" id="dock-occasions" class="dock-btn flex flex-col items-center justify-center w-16 py-1 rounded-2xl text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M20 12v10H4V12"></path><path d="M2 7h20v5H2z"></path><path d="M12 22V7"></path><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+        </svg>
+        <span class="text-[10px] font-semibold tracking-tight">Occasions</span>
+      </button>
+
+      <!-- 3. Bouton Central "+ Ajouter" Mis en valeur -->
+      <div class="-mt-6">
+        <button onclick="openFormSheet()" aria-label="Ajouter un cadeau" class="fab-glow w-14 h-14 rounded-full bg-gradient-to-tr from-burgundy via-rose-600 to-amberGold text-white flex items-center justify-center shadow-lg border-4 border-cream dark:border-obsidian active:scale-90 transition-transform">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path d="M12 5v14M5 12h14"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- 4. Personnes -->
+      <button onclick="openPeopleSheet()" id="dock-personnes" class="dock-btn flex flex-col items-center justify-center w-16 py-1 rounded-2xl text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        <span class="text-[10px] font-semibold tracking-tight">Personnes</span>
+      </button>
+
+      <!-- 5. GitHub (Export 1-clic) -->
+      <button onclick="openGithubSheet()" id="dock-github" class="dock-btn flex flex-col items-center justify-center w-16 py-1 rounded-2xl text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path>
+        </svg>
+        <span class="text-[10px] font-semibold tracking-tight">GitHub</span>
+      </button>
+
+    </div>
+  </nav>
+
+  <!-- ===================================================================== -->
+  <!-- FOND OBSCURCI PARTAGÉ POUR LES BOTTOM SHEETS                          -->
+  <!-- ===================================================================== -->
+  <div id="sheet-backdrop" onclick="closeAllSheets()" class="sheet-backdrop fixed inset-0 bg-black/60 backdrop-blur-xs z-40 active"></div>
+
+  <!-- ===================================================================== -->
+  <!-- 1. BOTTOM SHEET : DÉTAIL D'UN CADEAU                                  -->
+  <!-- ===================================================================== -->
+  <div id="detail-sheet" class="bottom-sheet fixed inset-x-0 bottom-0 z-50 max-w-xl mx-auto bg-white dark:bg-charcoal rounded-t-[32px] border-t border-zinc-200/80 dark:border-zinc-800 shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
+    <div class="sticky top-0 z-10 bg-white/80 dark:bg-charcoal/80 backdrop-blur-md pt-3 pb-2 px-6 flex items-center justify-between">
+      <div class="w-12 h-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700 mx-auto"></div>
+      <button onclick="closeAllSheets()" class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 flex items-center justify-center text-sm font-bold absolute right-5 top-3">✕</button>
+    </div>
+    <div id="detail-sheet-content" class="p-6 pt-2">
+      <!-- Injecté par JS -->
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 2. BOTTOM SHEET : FORMULAIRE AJOUTER / MODIFIER UN CADEAU             -->
+  <!-- ===================================================================== -->
+  <div id="form-sheet" class="bottom-sheet fixed inset-x-0 bottom-0 z-50 max-w-xl mx-auto bg-white dark:bg-charcoal rounded-t-[32px] border-t border-zinc-200/80 dark:border-zinc-800 shadow-2xl max-h-[92vh] overflow-y-auto no-scrollbar">
+    <div class="sticky top-0 z-10 bg-white/95 dark:bg-charcoal/95 backdrop-blur-md pt-3 pb-3 px-6 border-b border-zinc-100 dark:border-zinc-800/80">
+      <div class="w-12 h-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700 mx-auto mb-2"></div>
+      <div class="flex items-center justify-between">
+        <h2 id="form-sheet-title" class="font-serif text-2xl sm:text-3xl text-zinc-900 dark:text-white">Ajouter une idée cadeau</h2>
+        <button onclick="closeAllSheets()" class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 flex items-center justify-center text-sm font-bold">✕</button>
+      </div>
+    </div>
+
+    <form id="gift-form" onsubmit="saveGiftForm(event)" class="p-6 space-y-4">
+      <input type="hidden" id="form-id" value="">
+
+      <!-- Titre & Prix -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Nom du cadeau *</label>
+          <input type="text" id="form-title" required="" placeholder="Ex: Casque audio beige, Pull Mérinos..." class="w-full px-4 py-3 rounded-2xl bg-cream dark:bg-obsidian border border-zinc-200 dark:border-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-amberGold">
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Prix estimé (€) *</label>
+          <input type="number" id="form-price" required="" min="0" step="0.5" placeholder="Ex: 65" class="w-full px-4 py-3 rounded-2xl bg-cream dark:bg-obsidian border border-zinc-200 dark:border-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-amberGold">
+        </div>
+      </div>
+
+      <!-- Occasion & Niveau d'envie -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Occasion</label>
+          <select id="form-occasion" class="w-full px-4 py-3 rounded-2xl bg-cream dark:bg-obsidian border border-zinc-200 dark:border-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-amberGold">
+            <option value="noel">🎄 Noël</option>
+            <option value="anniversaire">🎂 Anniversaire</option>
+            <option value="les-deux">✨ Noël &amp; Anniversaire</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Niveau d'envie</label>
+          <select id="form-priority" class="w-full px-4 py-3 rounded-2xl bg-cream dark:bg-obsidian border border-zinc-200 dark:border-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-amberGold">
+            <option value="3">🔥 Coup de cœur absolu</option>
+            <option value="2">✨ Très envie</option>
+            <option value="1">💡 Idée sympa</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Destinataire & Boutique -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Pour qui ? (Destinataire)</label>
+          <input type="text" id="form-recipient" list="recipient-suggestions" required="" placeholder="Ex: Pour moi, Maman, Julie..." value="Pour moi" class="w-full px-4 py-3 rounded-2xl bg-cream dark:bg-obsidian border border-zinc-200 dark:border-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-amberGold">
+          <datalist id="recipient-suggestions">
+            <option value="Pour moi"></option>
+            <option value="Maman"></option>
+            <option value="Papa"></option>
+            <option value="Partenaire"></option>
+            <option value="Amis"></option>
+          </datalist>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Boutique / Marque</label>
+          <input type="text" id="form-store" placeholder="Ex: Fnac, Sézane, Artisan local..." class="w-full px-4 py-3 rounded-2xl bg-cream dark:bg-obsidian border border-zinc-200 dark:border-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-amberGold">
+        </div>
+      </div>
+
+      <!-- Lien URL de la boutique -->
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Lien web vers l'article (optionnel)</label>
+        <input type="url" id="form-url" placeholder="https://www.boutique.fr/mon-article" class="w-full px-4 py-3 rounded-2xl bg-cream dark:bg-obsidian border border-zinc-200 dark:border-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-amberGold">
+      </div>
+
+      <!-- Image : URL ou Galerie de 8 photos esthétiques prédéfinies -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Photo du cadeau</label>
+          <span class="text-[11px] text-amberGold font-medium">Collez un lien ou choisissez un thème ↓</span>
+        </div>
+        <input type="url" id="form-image" placeholder="https://... (ou cliquez sur une vignette ci-dessous)" class="w-full px-4 py-2.5 rounded-2xl bg-cream dark:bg-obsidian border border-zinc-200 dark:border-zinc-800 text-xs mb-2.5 focus:outline-none focus:ring-2 focus:ring-amberGold">
+
+        <!-- Galerie de 8 catégories prédéfinies -->
+        <div class="grid grid-cols-4 sm:grid-cols-8 gap-2" id="preset-gallery">
+        <button type="button" onclick="selectPresetImage('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&amp;fit=crop&amp;w=900&amp;q=80', 'Tech')" class="group relative rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700 h-14 flex flex-col items-center justify-center focus:outline-none focus:ring-2 focus:ring-amberGold">
+          <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&amp;fit=crop&amp;w=900&amp;q=80" alt="Tech" class="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:scale-110 transition">
+          <div class="absolute inset-0 bg-black/40"></div>
+          <span class="relative text-sm">🎧</span>
+          <span class="relative text-[9px] font-bold text-white tracking-tight">Tech</span>
+        </button>
+      
+        <button type="button" onclick="selectPresetImage('https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&amp;fit=crop&amp;w=900&amp;q=80', 'Mode')" class="group relative rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700 h-14 flex flex-col items-center justify-center focus:outline-none focus:ring-2 focus:ring-amberGold">
+          <img src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&amp;fit=crop&amp;w=900&amp;q=80" alt="Mode" class="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:scale-110 transition">
+          <div class="absolute inset-0 bg-black/40"></div>
+          <span class="relative text-sm">🧶</span>
+          <span class="relative text-[9px] font-bold text-white tracking-tight">Mode</span>
+        </button>
+      
+        <button type="button" onclick="selectPresetImage('https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&amp;fit=crop&amp;w=900&amp;q=80', 'Déco')" class="group relative rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700 h-14 flex flex-col items-center justify-center focus:outline-none focus:ring-2 focus:ring-amberGold">
+          <img src="https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&amp;fit=crop&amp;w=900&amp;q=80" alt="Déco" class="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:scale-110 transition">
+          <div class="absolute inset-0 bg-black/40"></div>
+          <span class="relative text-sm">🛋️</span>
+          <span class="relative text-[9px] font-bold text-white tracking-tight">Déco</span>
+        </button>
+      
+        <button type="button" onclick="selectPresetImage('https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&amp;fit=crop&amp;w=900&amp;q=80', 'Livre')" class="group relative rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700 h-14 flex flex-col items-center justify-center focus:outline-none focus:ring-2 focus:ring-amberGold">
+          <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&amp;fit=crop&amp;w=900&amp;q=80" alt="Livre" class="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:scale-110 transition">
+          <div class="absolute inset-0 bg-black/40"></div>
+          <span class="relative text-sm">📚</span>
+          <span class="relative text-[9px] font-bold text-white tracking-tight">Livre</span>
+        </button>
+      
+        <button type="button" onclick="selectPresetImage('https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&amp;fit=crop&amp;w=900&amp;q=80', 'Gastro')" class="group relative rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700 h-14 flex flex-col items-center justify-center focus:outline-none focus:ring-2 focus:ring-amberGold">
+          <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&amp;fit=crop&amp;w=900&amp;q=80" alt="Gastro" class="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:scale-110 transition">
+          <div class="absolute inset-0 bg-black/40"></div>
+          <span class="relative text-sm">☕</span>
+          <span class="relative text-[9px] font-bold text-white tracking-tight">Gastro</span>
+        </button>
+      
+        <button type="button" onclick="selectPresetImage('https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&amp;fit=crop&amp;w=900&amp;q=80', 'Jeux')" class="group relative rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700 h-14 flex flex-col items-center justify-center focus:outline-none focus:ring-2 focus:ring-amberGold">
+          <img src="https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&amp;fit=crop&amp;w=900&amp;q=80" alt="Jeux" class="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:scale-110 transition">
+          <div class="absolute inset-0 bg-black/40"></div>
+          <span class="relative text-sm">🎲</span>
+          <span class="relative text-[9px] font-bold text-white tracking-tight">Jeux</span>
+        </button>
+      
+        <button type="button" onclick="selectPresetImage('https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&amp;fit=crop&amp;w=900&amp;q=80', 'Beauté')" class="group relative rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700 h-14 flex flex-col items-center justify-center focus:outline-none focus:ring-2 focus:ring-amberGold">
+          <img src="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&amp;fit=crop&amp;w=900&amp;q=80" alt="Beauté" class="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:scale-110 transition">
+          <div class="absolute inset-0 bg-black/40"></div>
+          <span class="relative text-sm">🕯️</span>
+          <span class="relative text-[9px] font-bold text-white tracking-tight">Beauté</span>
+        </button>
+      
+        <button type="button" onclick="selectPresetImage('https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&amp;fit=crop&amp;w=900&amp;q=80', 'Voyage')" class="group relative rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700 h-14 flex flex-col items-center justify-center focus:outline-none focus:ring-2 focus:ring-amberGold">
+          <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&amp;fit=crop&amp;w=900&amp;q=80" alt="Voyage" class="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:scale-110 transition">
+          <div class="absolute inset-0 bg-black/40"></div>
+          <span class="relative text-sm">🧳</span>
+          <span class="relative text-[9px] font-bold text-white tracking-tight">Voyage</span>
+        </button>
+      </div>
+      </div>
+
+      <!-- Notes (Taille, couleur, détails) -->
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">Notes &amp; Précisions (Taille, coloris, référence...)</label>
+        <textarea id="form-notes" rows="2" placeholder="Ex: Taille M, coloris Écru ou Vert Sauge. Disponible aussi en magasin." class="w-full px-4 py-3 rounded-2xl bg-cream dark:bg-obsidian border border-zinc-200 dark:border-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-amberGold"></textarea>
+      </div>
+
+      <!-- Boutons d'action du formulaire -->
+      <div class="pt-2 flex items-center gap-3">
+        <button type="button" onclick="closeAllSheets()" class="w-1/3 py-3.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-sm font-semibold">
+          Annuler
+        </button>
+        <button type="submit" class="w-2/3 py-3.5 rounded-2xl bg-gradient-to-r from-burgundy to-amberGold text-white text-sm font-bold shadow-md active:scale-98 transition">
+          Enregistrer ce cadeau ✨
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 3. BOTTOM SHEET : FILTRAGE RAPIDE PAR OCCASIONS                       -->
+  <!-- ===================================================================== -->
+  <div id="occasions-sheet" class="bottom-sheet fixed inset-x-0 bottom-0 z-50 max-w-xl mx-auto bg-white dark:bg-charcoal rounded-t-[32px] border-t border-zinc-200/80 dark:border-zinc-800 shadow-2xl p-6">
+    <div class="w-12 h-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700 mx-auto mb-4"></div>
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 class="font-serif text-3xl text-zinc-900 dark:text-white">Explorer par Occasion</h3>
+        <p class="text-xs text-zinc-500 dark:text-zinc-400">Filtrez la vitrine en un toucher</p>
+      </div>
+      <button onclick="closeAllSheets()" class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 flex items-center justify-center text-sm font-bold">✕</button>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+      <button onclick="setQuickFilter('noel'); closeAllSheets();" class="flex items-center gap-4 p-4 rounded-3xl bg-pine/10 dark:bg-pine/20 border border-pine/25 text-left hover:scale-[1.01] transition">
+        <span class="w-12 h-12 rounded-2xl bg-pine text-white flex items-center justify-center text-2xl shrink-0">🎄</span>
+        <div>
+          <div class="font-bold text-zinc-900 dark:text-white text-sm">Liste de Noël</div>
+          <div class="text-xs text-zinc-500 dark:text-zinc-400" id="occ-count-noel">4 idées sous le sapin</div>
+        </div>
+      </button>
+
+      <button onclick="setQuickFilter('anniversaire'); closeAllSheets();" class="flex items-center gap-4 p-4 rounded-3xl bg-amberGold/10 dark:bg-amberGold/20 border border-amberGold/25 text-left hover:scale-[1.01] transition">
+        <span class="w-12 h-12 rounded-2xl bg-amberGold text-white flex items-center justify-center text-2xl shrink-0">🎂</span>
+        <div>
+          <div class="font-bold text-zinc-900 dark:text-white text-sm">Anniversaire</div>
+          <div class="text-xs text-zinc-500 dark:text-zinc-400" id="occ-count-anniv">3 idées d'anniversaire</div>
+        </div>
+      </button>
+
+      <button onclick="setQuickFilter('coup-de-coeur'); closeAllSheets();" class="flex items-center gap-4 p-4 rounded-3xl bg-burgundy/10 dark:bg-burgundy/20 border border-burgundy/25 text-left hover:scale-[1.01] transition">
+        <span class="w-12 h-12 rounded-2xl bg-burgundy text-white flex items-center justify-center text-2xl shrink-0">🔥</span>
+        <div>
+          <div class="font-bold text-zinc-900 dark:text-white text-sm">Coups de cœur absolus</div>
+          <div class="text-xs text-zinc-500 dark:text-zinc-400" id="occ-count-fav">3 coups de cœur</div>
+        </div>
+      </button>
+
+      <button onclick="setQuickFilter('all'); closeAllSheets();" class="flex items-center gap-4 p-4 rounded-3xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-left hover:scale-[1.01] transition">
+        <span class="w-12 h-12 rounded-2xl bg-zinc-800 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center text-2xl shrink-0">✨</span>
+        <div>
+          <div class="font-bold text-zinc-900 dark:text-white text-sm">Toute la vitrine</div>
+          <div class="text-xs text-zinc-500 dark:text-zinc-400">Afficher toutes les idées</div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 4. BOTTOM SHEET : FILTRER PAR PERSONNE (DESTINATAIRE)                 -->
+  <!-- ===================================================================== -->
+  <div id="people-sheet" class="bottom-sheet fixed inset-x-0 bottom-0 z-50 max-w-xl mx-auto bg-white dark:bg-charcoal rounded-t-[32px] border-t border-zinc-200/80 dark:border-zinc-800 shadow-2xl p-6">
+    <div class="w-12 h-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700 mx-auto mb-4"></div>
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 class="font-serif text-3xl text-zinc-900 dark:text-white">Filtrer par Personne</h3>
+        <p class="text-xs text-zinc-500 dark:text-zinc-400">Mes envies personnelles ou mes idées pour mes proches</p>
+      </div>
+      <button onclick="closeAllSheets()" class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 flex items-center justify-center text-sm font-bold">✕</button>
+    </div>
+
+    <div id="people-list-container" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[55vh] overflow-y-auto no-scrollbar pb-2">
+      <!-- Généré dynamiquement par JS selon les destinataires présents -->
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 5. BOTTOM SHEET : PUBLIER / METTRE À JOUR SUR GITHUB PAGES            -->
+  <!-- ===================================================================== -->
+  <div id="github-sheet" class="bottom-sheet fixed inset-x-0 bottom-0 z-50 max-w-xl mx-auto bg-white dark:bg-charcoal rounded-t-[32px] border-t border-zinc-200/80 dark:border-zinc-800 shadow-2xl max-h-[92vh] overflow-y-auto no-scrollbar p-6 active">
+    <div class="w-12 h-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700 mx-auto mb-4"></div>
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-serif text-2xl sm:text-3xl text-zinc-900 dark:text-white leading-tight">Propulser sur GitHub Pages</h3>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400">100 % gratuit, sans serveur ni abonnement</p>
+        </div>
+      </div>
+      <button onclick="closeAllSheets()" class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 flex items-center justify-center text-sm font-bold">✕</button>
+    </div>
+
+    <!-- Explication claire du fonctionnement -->
+    <div class="p-4 rounded-3xl bg-cream dark:bg-obsidian border border-zinc-200/80 dark:border-zinc-800 mb-4 space-y-2 text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">
+      <p class="font-bold text-zinc-900 dark:text-white text-sm">💡 Comment fonctionne la sauvegarde ?</p>
+      <p>
+        1. <strong>Sur votre téléphone/ordinateur :</strong> chaque cadeau ajouté est sauvegardé instantanément dans la mémoire de votre navigateur (<code class="px-1.5 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800">localStorage</code>).
+      </p>
+      <p>
+        2. <strong>Pour partager votre liste à jour avec vos proches sur GitHub Pages :</strong> cliquez sur le bouton ci-dessous. Il génère un nouveau fichier <code class="px-1.5 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800">index.html</code> contenant tous vos nouveaux cadeaux <strong>intégrés en dur dans le code</strong> ! Il vous suffit de remplacer le fichier sur votre dépôt GitHub.
+      </p>
+    </div>
+
+    <!-- Action principale : Télécharger index.html mis à jour -->
+    <div class="space-y-3 mb-5">
+      <button onclick="downloadUpdatedHtmlFile()" class="w-full py-4 px-5 rounded-2xl bg-gradient-to-r from-pine via-emerald-700 to-pine text-white font-bold text-sm shadow-lg flex items-center justify-center gap-2.5 active:scale-98 transition">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span>Télécharger mon fichier index.html mis à jour</span>
+      </button>
+
+      <div class="grid grid-cols-2 gap-2.5">
+        <button onclick="copyGiftsJson()" class="py-3 px-4 rounded-2xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-semibold text-xs flex items-center justify-center gap-2 transition">
+          <span>📋 Copier le JSON</span>
+        </button>
+        <button onclick="toggleImportJsonBox()" class="py-3 px-4 rounded-2xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-semibold text-xs flex items-center justify-center gap-2 transition">
+          <span>📥 Importer un JSON</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Zone d'import JSON (masquée par défaut) -->
+    <div id="import-json-box" class="hidden mb-5 p-4 rounded-2xl bg-zinc-50 dark:bg-obsidian border border-zinc-200 dark:border-zinc-800">
+      <label class="block text-xs font-bold mb-1.5">Collez votre bloc JSON ci-dessous :</label>
+      <textarea id="import-json-textarea" rows="4" placeholder="[{&quot;id&quot;: &quot;...&quot;, &quot;title&quot;: &quot;...&quot;}]" class="w-full p-3 rounded-xl bg-white dark:bg-charcoal border border-zinc-200 dark:border-zinc-700 text-xs font-mono mb-2"></textarea>
+      <button onclick="importGiftsJson()" class="w-full py-2.5 rounded-xl bg-amberGold text-white text-xs font-bold">
+        Remplacer la liste par ce JSON
+      </button>
+    </div>
+
+    <!-- Mini-guide GitHub Pages en 3 étapes -->
+    <div class="border-t border-zinc-200/80 dark:border-zinc-800 pt-4 mb-4">
+      <h4 class="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2.5">Rappel : Mettre en ligne sur GitHub en 2 minutes</h4>
+      <ol class="text-xs text-zinc-600 dark:text-zinc-400 space-y-1.5 list-decimal list-inside">
+        <li>Créez un dépôt public sur <strong>github.com</strong> (ex: <code class="text-zinc-800 dark:text-zinc-200">mes-cadeaux</code>).</li>
+        <li>Déposez-y ce fichier renommé en <strong><code class="text-zinc-800 dark:text-zinc-200">index.html</code></strong> (via <em>Add file &gt; Upload files</em>).</li>
+        <li>Allez dans <strong>Settings &gt; Pages</strong>, choisissez la branche <code class="text-zinc-800 dark:text-zinc-200">main</code> et cliquez sur <strong>Save</strong>. Votre site est en ligne !</li>
+      </ol>
+    </div>
+
+    <!-- Réinitialiser les données de démo -->
+    <div class="text-center pt-1">
+      <button onclick="resetToDemoGifts()" class="text-[11px] text-zinc-400 hover:text-burgundy underline">
+        Réinitialiser avec les 6 cadeaux d'exemple d'origine
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- NOTIFICATION TOAST FLOTTANTE (Zéro alert() !)                         -->
+  <!-- ===================================================================== -->
+  <div id="toast-notification" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 -translate-y-4 transition-all duration-300">
+    <div class="px-5 py-3 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-xl text-xs font-bold flex items-center gap-2.5 border border-white/10">
+      <span id="toast-icon">✨</span>
+      <span id="toast-message">Action effectuée</span>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- LOGIQUE JAVASCRIPT DE L'APPLICATION                                   -->
+  <!-- ===================================================================== -->
+  <script>
+    // -------------------------------------------------------------------------
+    // GALERIE DE 8 PHOTOS PRÉDÉFINIES PAR CATÉGORIE (POUR LE FORMULAIRE)
+    // -------------------------------------------------------------------------
+    const PRESET_CATEGORIES = [
+      {
+        label: 'Tech',
+        emoji: '🎧',
+        url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=900&q=80'
+      },
+      {
+        label: 'Mode',
+        emoji: '🧶',
+        url: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=900&q=80'
+      },
+      {
+        label: 'Déco',
+        emoji: '🛋️',
+        url: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=900&q=80'
+      },
+      {
+        label: 'Livre',
+        emoji: '📚',
+        url: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=900&q=80'
+      },
+      {
+        label: 'Gastro',
+        emoji: '☕',
+        url: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=900&q=80'
+      },
+      {
+        label: 'Jeux',
+        emoji: '🎲',
+        url: 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&w=900&q=80'
+      },
+      {
+        label: 'Beauté',
+        emoji: '🕯️',
+        url: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=900&q=80'
+      },
+      {
+        label: 'Voyage',
+        emoji: '🧳',
+        url: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=80'
+      }
+    ];
+
+    // -------------------------------------------------------------------------
+    // DONNÉES INITIALES (6 EXEMPLES DE CADEAUX VARIÉS & ESTHÉTIQUES)
+    // Les balises ci-dessous permettent de mettre à jour le fichier en 1 clic !
+    // -------------------------------------------------------------------------
+    /*__GIFTS_DATA_START__*/
+    const INITIAL_GIFTS = [
+      {
+            "id": "gift-1",
+            "title": "Casque Audio Sans Fil à Réduction de Bruit",
+            "price": 249,
+            "occasion": "noel",
+            "recipient": "Pour moi",
+            "priority": 3,
+            "store": "Fnac / Sony",
+            "url": "https://www.fnac.com",
+            "image": "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=900&q=80",
+            "notes": "Coloris Beige Sable ou Argent Platine de préférence. Parfait pour le train et le télétravail.",
+            "reserved": false,
+            "createdAt": 1710000006
+      },
+      {
+            "id": "gift-2",
+            "title": "Machine à Expresso Manuelle Style Barista",
+            "price": 189,
+            "occasion": "noel",
+            "recipient": "Partenaire",
+            "priority": 3,
+            "store": "MaxiCoffee",
+            "url": "https://www.maxicoffee.com",
+            "image": "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?auto=format&fit=crop&w=900&q=80",
+            "notes": "Finition inox brossé avec buse vapeur pour faire des latte art maison.",
+            "reserved": false,
+            "createdAt": 1710000005
+      },
+      {
+            "id": "gift-3",
+            "title": "Pull Col Rond en Laine Mérinos Écru",
+            "price": 115,
+            "occasion": "anniversaire",
+            "recipient": "Pour moi",
+            "priority": 2,
+            "store": "Sézane / Octobre",
+            "url": "https://www.sezane.com",
+            "image": "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=900&q=80",
+            "notes": "Taille M — Maille côtelée douce, coloris Écru naturel ou Vert Sauge.",
+            "reserved": false,
+            "createdAt": 1710000004
+      },
+      {
+            "id": "gift-4",
+            "title": "Lampe à Poser Design Champignon en Verre Opalin",
+            "price": 68,
+            "occasion": "anniversaire",
+            "recipient": "Pour moi",
+            "priority": 3,
+            "store": "Smallable / Maisons du Monde",
+            "url": "https://www.smallable.com",
+            "image": "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&w=900&q=80",
+            "notes": "Lumière chaude tamisée pour le coin lecture du salon.",
+            "reserved": true,
+            "createdAt": 1710000003
+      },
+      {
+            "id": "gift-5",
+            "title": "Beau Livre « Voyages & Tables Méditerranéennes »",
+            "price": 39,
+            "occasion": "noel",
+            "recipient": "Maman",
+            "priority": 2,
+            "store": "Librairie de quartier",
+            "url": "https://www.placedeslibraires.fr",
+            "image": "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=900&q=80",
+            "notes": "Édition reliée grand format avec photographies ensoleillées et recettes familiales.",
+            "reserved": false,
+            "createdAt": 1710000002
+      },
+      {
+            "id": "gift-6",
+            "title": "Coffret Bougie Botanique & Parfum d'Intérieur Ambré",
+            "price": 45,
+            "occasion": "les-deux",
+            "recipient": "Amis",
+            "priority": 1,
+            "store": "Diptyque / Artisan Cirier",
+            "url": "https://www.diptyqueparis.com",
+            "image": "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=900&q=80",
+            "notes": "Senteur figuier sauvage, cèdre ou fleur d'oranger. Cire 100% végétale.",
+            "reserved": false,
+            "createdAt": 1710000001
+      }
+];
+    /*__GIFTS_DATA_END__*/
+
+    // -------------------------------------------------------------------------
+    // ÉTAT DE L'APPLICATION
+    // -------------------------------------------------------------------------
+    const STORAGE_KEY = 'atelier_envies_gifts_v1';
+    const THEME_KEY = 'atelier_envies_theme_v1';
+    const GRID_KEY = 'atelier_envies_mobile_grid_v1';
+
+    let gifts = [];
+    let currentFilter = 'all';       // all, noel, anniversaire, coup-de-coeur, under-30, 30-80, over-80, reserved
+    let currentRecipient = 'all';    // all ou nom du destinataire
+    let searchQuery = '';
+    let currentSort = 'priority';    // priority, price-asc, price-desc, newest
+    let mobileTwoColumns = false;    // 1 ou 2 colonnes sur mobile
+
+    // -------------------------------------------------------------------------
+    // INITIALISATION AU CHARGEMENT
+    // -------------------------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      initMobileGridPref();
+      loadGiftsData();
+      renderPresetGallery();
+      renderApp();
+    });
+
+    function loadGiftsData() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            gifts = parsed;
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('Lecture localStorage impossible, chargement des données initiales.', e);
+      }
+      gifts = JSON.parse(JSON.stringify(INITIAL_GIFTS));
+      saveGiftsToStorage();
+    }
+
+    function saveGiftsToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(gifts));
+      } catch (e) {
+        console.warn('Sauvegarde localStorage impossible.', e);
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // GESTION DU MODE CLAIR / SOMBRE
+    // -------------------------------------------------------------------------
+    function initTheme() {
+      const savedTheme = localStorage.getItem(THEME_KEY);
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      updateThemeIcons();
+    }
+
+    function toggleDarkMode() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
+      updateThemeIcons();
+      showToast(isDark ? 'Mode Sombre activé 🌙' : 'Mode Clair chaleureux activé ☀️', isDark ? '🌙' : '☀️');
+    }
+
+    function updateThemeIcons() {
+      const isDark = document.documentElement.classList.contains('dark');
+      document.getElementById('icon-sun').classList.toggle('hidden', !isDark);
+      document.getElementById('icon-moon').classList.toggle('hidden', isDark);
+      const metaTheme = document.getElementById('theme-color-meta');
+      if (metaTheme) metaTheme.setAttribute('content', isDark ? '#0F1115' : '#FAF8F5');
+    }
+
+    // -------------------------------------------------------------------------
+    // BASCULE GRILLE MOBILE (1 OU 2 COLONNES SUR MOBILE)
+    // -------------------------------------------------------------------------
+    function initMobileGridPref() {
+      const saved = localStorage.getItem(GRID_KEY);
+      mobileTwoColumns = saved === '2';
+      applyMobileGridClasses();
+    }
+
+    function toggleMobileGrid() {
+      mobileTwoColumns = !mobileTwoColumns;
+      localStorage.setItem(GRID_KEY, mobileTwoColumns ? '2' : '1');
+      applyMobileGridClasses();
+      renderGiftsGrid();
+      showToast(mobileTwoColumns ? 'Affichage compact (2 colonnes)' : 'Affichage éditorial ( grandes cartes)', '📱');
+    }
+
+    function applyMobileGridClasses() {
+      const grid = document.getElementById('gifts-grid');
+      const icon1 = document.getElementById('icon-grid-1');
+      const icon2 = document.getElementById('icon-grid-2');
+
+      if (mobileTwoColumns) {
+        grid.className = 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5';
+        icon2.classList.add('hidden');
+        icon1.classList.remove('hidden');
+      } else {
+        grid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5';
+        icon2.classList.remove('hidden');
+        icon1.classList.add('hidden');
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // FILTRAGE, RECHERCHE & TRI
+    // -------------------------------------------------------------------------
+    function getFilteredAndSortedGifts() {
+      return gifts
+        .filter(g => {
+          // Filtre par destinataire
+          if (currentRecipient !== 'all' && g.recipient.toLowerCase() !== currentRecipient.toLowerCase()) {
+            return false;
+          }
+
+          // Filtre par pilule rapide
+          if (currentFilter === 'noel' && g.occasion !== 'noel' && g.occasion !== 'les-deux') return false;
+          if (currentFilter === 'anniversaire' && g.occasion !== 'anniversaire' && g.occasion !== 'les-deux') return false;
+          if (currentFilter === 'coup-de-coeur' && Number(g.priority) !== 3) return false;
+          if (currentFilter === 'under-30' && Number(g.price) >= 30) return false;
+          if (currentFilter === '30-80' && (Number(g.price) < 30 || Number(g.price) > 80)) return false;
+          if (currentFilter === 'over-80' && Number(g.price) <= 80) return false;
+          if (currentFilter === 'reserved' && !g.reserved) return false;
+
+          // Recherche texte
+          if (searchQuery.trim() !== '') {
+            const q = searchQuery.toLowerCase().trim();
+            const matchTitle = (g.title || '').toLowerCase().includes(q);
+            const matchStore = (g.store || '').toLowerCase().includes(q);
+            const matchNotes = (g.notes || '').toLowerCase().includes(q);
+            const matchRecipient = (g.recipient || '').toLowerCase().includes(q);
+            if (!matchTitle && !matchStore && !matchNotes && !matchRecipient) return false;
+          }
+
+          return true;
+        })
+        .sort((a, b) => {
+          if (currentSort === 'priority') {
+            if (b.priority !== a.priority) return b.priority - a.priority;
+            return (b.createdAt || 0) - (a.createdAt || 0);
+          }
+          if (currentSort === 'price-asc') return Number(a.price) - Number(b.price);
+          if (currentSort === 'price-desc') return Number(b.price) - Number(a.price);
+          if (currentSort === 'newest') return (b.createdAt || 0) - (a.createdAt || 0);
+          return 0;
+        });
+    }
+
+    function setQuickFilter(filterName) {
+      currentFilter = filterName;
+      updateFilterPillsUI();
+      renderApp();
+    }
+
+    function setRecipientFilter(recipientName) {
+      currentRecipient = recipientName;
+      const banner = document.getElementById('active-recipient-banner');
+      const nameEl = document.getElementById('active-recipient-name');
+      if (recipientName === 'all') {
+        banner.classList.add('hidden');
+      } else {
+        banner.classList.remove('hidden');
+        nameEl.textContent = recipientName;
+      }
+      renderApp();
+    }
+
+    function handleSearch(val) {
+      searchQuery = val;
+      document.getElementById('btn-clear-search').classList.toggle('hidden', val.trim() === '');
+      renderApp();
+    }
+
+    function clearSearch() {
+      const input = document.getElementById('search-input');
+      input.value = '';
+      handleSearch('');
+    }
+
+    function handleSortChange(val) {
+      currentSort = val;
+      renderApp();
+    }
+
+    function resetAllFilters() {
+      currentFilter = 'all';
+      currentRecipient = 'all';
+      searchQuery = '';
+      document.getElementById('search-input').value = '';
+      document.getElementById('btn-clear-search').classList.add('hidden');
+      document.getElementById('active-recipient-banner').classList.add('hidden');
+      updateFilterPillsUI();
+      renderApp();
+    }
+
+    function updateFilterPillsUI() {
+      document.querySelectorAll('.filter-pill').forEach(btn => {
+        const isSelected = btn.getAttribute('data-filter') === currentFilter;
+        if (isSelected) {
+          btn.className = 'filter-pill shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-sm';
+        } else {
+          btn.className = 'filter-pill shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white dark:bg-charcoal text-zinc-700 dark:text-zinc-300 border border-zinc-200/80 dark:border-zinc-800';
+        }
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // RENDU GLOBAL (STATS + GRILLE)
+    // -------------------------------------------------------------------------
+    function renderApp() {
+      renderStats();
+      renderGiftsGrid();
+    }
+
+    function renderStats() {
+      const activeList = currentRecipient === 'all'
+        ? gifts
+        : gifts.filter(g => g.recipient.toLowerCase() === currentRecipient.toLowerCase());
+
+      const totalCount = activeList.length;
+      const reservedCount = activeList.filter(g => g.reserved).length;
+      const favCount = activeList.filter(g => Number(g.priority) === 3).length;
+      const totalSum = activeList.reduce((acc, g) => acc + (Number(g.price) || 0), 0);
+      const avgPrice = totalCount > 0 ? Math.round(totalSum / totalCount) : 0;
+
+      document.getElementById('stat-total-count').textContent = totalCount;
+      document.getElementById('stat-reserved-sub').textContent = `${reservedCount} réservé${reservedCount > 1 ? 's' : ''}`;
+      document.getElementById('stat-avg-price').textContent = `${avgPrice} €`;
+      document.getElementById('stat-total-price').textContent = `Total: ${Math.round(totalSum)}€`;
+      document.getElementById('stat-fav-count').textContent = favCount;
+
+      // Mettre à jour aussi les compteurs dans le tiroir Occasions
+      const noelCount = gifts.filter(g => g.occasion === 'noel' || g.occasion === 'les-deux').length;
+      const annivCount = gifts.filter(g => g.occasion === 'anniversaire' || g.occasion === 'les-deux').length;
+      const allFavCount = gifts.filter(g => Number(g.priority) === 3).length;
+
+      const elNoel = document.getElementById('occ-count-noel');
+      const elAnniv = document.getElementById('occ-count-anniv');
+      const elFav = document.getElementById('occ-count-fav');
+      if (elNoel) elNoel.textContent = `${noelCount} idée${noelCount > 1 ? 's' : ''} sous le sapin`;
+      if (elAnniv) elAnniv.textContent = `${annivCount} idée${annivCount > 1 ? 's' : ''} d'anniversaire`;
+      if (elFav) elFav.textContent = `${allFavCount} coup${allFavCount > 1 ? 's' : ''} de cœur`;
+    }
+
+    // Helpers visuels pour les badges
+    function getOccasionBadge(occasion) {
+      if (occasion === 'noel') {
+        return { label: '🎄 Noël', classes: 'bg-pine/90 text-white' };
+      }
+      if (occasion === 'anniversaire') {
+        return { label: '🎂 Anniversaire', classes: 'bg-amberGold/95 text-white' };
+      }
+      return { label: '✨ Noël & Anniv.', classes: 'bg-zinc-900/85 text-white' };
+    }
+
+    function getPriorityBadge(priority) {
+      const p = Number(priority);
+      if (p === 3) {
+        return { label: 'Coup de cœur 🔥', short: '🔥', classes: 'bg-burgundy/90 text-white' };
+      }
+      if (p === 2) {
+        return { label: 'Très envie ✨', short: '✨', classes: 'bg-white/90 dark:bg-charcoal/90 text-zinc-900 dark:text-white' };
+      }
+      return { label: 'Idée sympa 💡', short: '💡', classes: 'bg-white/85 dark:bg-charcoal/85 text-zinc-700 dark:text-zinc-200' };
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function renderGiftsGrid() {
+      const container = document.getElementById('gifts-grid');
+      const emptyState = document.getElementById('empty-state');
+      const filtered = getFilteredAndSortedGifts();
+
+      if (filtered.length === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+
+      container.innerHTML = filtered.map(gift => {
+        const occ = getOccasionBadge(gift.occasion);
+        const prio = getPriorityBadge(gift.priority);
+        const fallbackImg = `https://placehold.co/800x600/F3EFEA/D97706?text=${encodeURIComponent(gift.title.slice(0, 18))}`;
+        const imgUrl = gift.image && gift.image.trim() !== '' ? gift.image : fallbackImg;
+
+        // Mode compact si 2 colonnes sur mobile
+        const imgHeightClass = mobileTwoColumns ? 'h-40 sm:h-56' : 'h-60 sm:h-60';
+        const paddingClass = mobileTwoColumns ? 'p-3 sm:p-5' : 'p-5';
+        const titleSizeClass = mobileTwoColumns ? 'text-base sm:text-xl line-clamp-1' : 'text-xl line-clamp-2';
+
+        return `
+          <article
+            onclick="openDetailSheet('${gift.id}')"
+            class="gift-card group cursor-pointer bg-white dark:bg-charcoal rounded-[24px] border border-zinc-200/80 dark:border-zinc-800/90 shadow-editorial dark:shadow-editorial-dark overflow-hidden flex flex-col justify-between relative ${gift.reserved ? 'opacity-75' : ''}"
+          >
+            <div>
+              <!-- Photo du produit avec badges en glassmorphism -->
+              <div class="relative ${imgHeightClass} w-full overflow-hidden bg-paper dark:bg-charcoalLight">
+                <img
+                  src="${escapeHtml(imgUrl)}"
+                  alt="${escapeHtml(gift.title)}"
+                  onerror="this.onerror=null; this.src='${fallbackImg}';"
+                  class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
+                  loading="lazy"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/15 pointer-events-none"></div>
+
+                <!-- Badges Haut : Occasion + Priorité -->
+                <div class="absolute top-3 inset-x-3 flex items-center justify-between gap-1.5">
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md shadow-xs ${occ.classes}">
+                    ${occ.label}
+                  </span>
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md shadow-xs ${prio.classes}">
+                    ${mobileTwoColumns ? prio.short : prio.label}
+                  </span>
+                </div>
+
+                <!-- Ruban si Déjà Réservé / Offert -->
+                ${gift.reserved ? `
+                  <div class="absolute inset-0 bg-emerald-950/45 backdrop-blur-[2px] flex items-center justify-center">
+                    <span class="px-4 py-1.5 rounded-full bg-emerald-600 text-white text-xs font-extrabold tracking-wide uppercase shadow-lg">
+                      ✓ Réservé / Offert
+                    </span>
+                  </div>
+                ` : ''}
+
+                <!-- Bas de l'image : Destinataire + Prix en surimpression -->
+                <div class="absolute bottom-3 inset-x-3 flex items-end justify-between gap-2">
+                  <span class="px-2.5 py-1 rounded-xl bg-black/55 backdrop-blur-md text-white text-[11px] font-semibold truncate max-w-[60%]">
+                    👤 ${escapeHtml(gift.recipient)}
+                  </span>
+                  <span class="px-3 py-1 rounded-2xl bg-white/95 dark:bg-obsidian/95 backdrop-blur-md text-zinc-900 dark:text-white font-serif text-lg sm:text-xl font-bold shadow-md">
+                    ${Number(gift.price)} €
+                  </span>
+                </div>
+              </div>
+
+              <!-- Corps de la carte -->
+              <div class="${paddingClass}">
+                <div class="flex items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wider text-amberGold mb-1">
+                  <span class="truncate">${escapeHtml(gift.store || 'Boutique libre')}</span>
+                </div>
+
+                <h2 class="font-serif ${titleSizeClass} text-zinc-900 dark:text-white leading-snug mb-1.5">
+                  ${escapeHtml(gift.title)}
+                </h2>
+
+                ${gift.notes ? `
+                  <p class="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                    ${escapeHtml(gift.notes)}
+                  </p>
+                ` : ''}
+              </div>
+            </div>
+
+            <!-- Pied de carte : Actions directes -->
+            <div class="${paddingClass} pt-0 flex items-center gap-2" onclick="event.stopPropagation()">
+              ${gift.url ? `
+                <a
+                  href="${escapeHtml(gift.url)}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex-1 py-2.5 px-3 rounded-xl bg-cream dark:bg-charcoalLight hover:bg-zinc-200/70 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 text-xs font-bold text-center transition truncate"
+                >
+                  Voir l'article ↗
+                </a>
+              ` : `
+                <button
+                  onclick="openDetailSheet('${gift.id}')"
+                  class="flex-1 py-2.5 px-3 rounded-xl bg-cream dark:bg-charcoalLight text-zinc-700 dark:text-zinc-300 text-xs font-semibold text-center transition"
+                >
+                  Détails
+                </button>
+              `}
+
+              <button
+                onclick="toggleReserveGift('${gift.id}')"
+                title="${gift.reserved ? 'Marquer comme disponible' : 'Marquer comme réservé / acheté'}"
+                class="py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 ${
+                  gift.reserved
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20'
+                }"
+              >
+                <span>✓</span>
+                <span class="${mobileTwoColumns ? 'hidden sm:inline' : ''}">${gift.reserved ? 'Réservé' : 'Réserver'}</span>
+              </button>
+
+              <button
+                onclick="openFormSheet('${gift.id}')"
+                title="Modifier ce cadeau"
+                class="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-charcoalLight text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 flex items-center justify-center shrink-0 transition"
+              >
+                ✎
+              </button>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    // -------------------------------------------------------------------------
+    // GESTION DES BOTTOM SHEETS (TIROIRS MOBILES ANIMÉS)
+    // -------------------------------------------------------------------------
+    function closeAllSheets() {
+      document.getElementById('sheet-backdrop').classList.remove('active');
+      document.querySelectorAll('.bottom-sheet').forEach(sheet => {
+        sheet.classList.remove('active');
+      });
+    }
+
+    function openSheetById(sheetId) {
+      closeAllSheets();
+      document.getElementById('sheet-backdrop').classList.add('active');
+      document.getElementById(sheetId).classList.add('active');
+    }
+
+    function switchDockTab(tabName) {
+      closeAllSheets();
+      if (tabName === 'vitrine') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    // 1. Tiroir Détail d'un cadeau
+    function openDetailSheet(giftId) {
+      const gift = gifts.find(g => g.id === giftId);
+      if (!gift) return;
+
+      const occ = getOccasionBadge(gift.occasion);
+      const prio = getPriorityBadge(gift.priority);
+      const fallbackImg = `https://placehold.co/800x600/F3EFEA/D97706?text=${encodeURIComponent(gift.title.slice(0, 18))}`;
+      const imgUrl = gift.image && gift.image.trim() !== '' ? gift.image : fallbackImg;
+
+      const content = document.getElementById('detail-sheet-content');
+      content.innerHTML = `
+        <div class="relative h-64 sm:h-72 rounded-3xl overflow-hidden mb-5 bg-paper dark:bg-obsidian">
+          <img
+            src="${escapeHtml(imgUrl)}"
+            alt="${escapeHtml(gift.title)}"
+            onerror="this.onerror=null; this.src='${fallbackImg}';"
+            class="w-full h-full object-cover"
+          />
+          <div class="absolute top-3 left-3 flex flex-wrap gap-2">
+            <span class="px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md ${occ.classes}">${occ.label}</span>
+            <span class="px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md ${prio.classes}">${prio.label}</span>
+          </div>
+          <div class="absolute bottom-3 right-3 px-4 py-1.5 rounded-2xl bg-white/95 dark:bg-obsidian/95 text-zinc-900 dark:text-white font-serif text-2xl font-bold shadow-lg">
+            ${Number(gift.price)} €
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between gap-2 text-xs font-bold uppercase tracking-wider text-amberGold mb-1">
+          <span>🏪 ${escapeHtml(gift.store || 'Boutique libre')}</span>
+          <span class="px-2.5 py-1 rounded-full bg-amberGold/10 text-amberGold">👤 ${escapeHtml(gift.recipient)}</span>
+        </div>
+
+        <h3 class="font-serif text-3xl text-zinc-900 dark:text-white leading-tight mb-3">
+          ${escapeHtml(gift.title)}
+        </h3>
+
+        <div class="p-4 rounded-2xl bg-cream dark:bg-obsidian border border-zinc-200/70 dark:border-zinc-800 mb-5">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1">Notes, taille & coloris souhaités</div>
+          <p class="text-sm text-zinc-700 dark:text-zinc-200 leading-relaxed">
+            ${gift.notes ? escapeHtml(gift.notes) : 'Aucune note particulière précisée pour cet article.'}
+          </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-2.5 mb-3">
+          ${gift.url ? `
+            <a
+              href="${escapeHtml(gift.url)}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex-1 py-3.5 px-5 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-bold text-center shadow-md"
+            >
+              Voir l'article sur la boutique ↗
+            </a>
+          ` : ''}
+          <button
+            onclick="toggleReserveGift('${gift.id}', true)"
+            class="flex-1 py-3.5 px-5 rounded-2xl text-sm font-bold transition ${
+              gift.reserved
+                ? 'bg-emerald-600 text-white'
+                : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30'
+            }"
+          >
+            ${gift.reserved ? '✓ Déjà réservé / offert (Annuler)' : '✓ Marquer comme réservé / acheté'}
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between pt-3 border-t border-zinc-200/60 dark:border-zinc-800">
+          <button
+            onclick="openFormSheet('${gift.id}')"
+            class="text-xs font-bold text-zinc-600 dark:text-zinc-300 hover:underline flex items-center gap-1.5 py-2"
+          >
+            <span>✎ Modifier cette fiche</span>
+          </button>
+          <button
+            onclick="deleteGift('${gift.id}')"
+            class="text-xs font-bold text-rose-600 hover:underline flex items-center gap-1.5 py-2"
+          >
+            <span>🗑 Supprimer ce cadeau</span>
+          </button>
+        </div>
+      `;
+
+      openSheetById('detail-sheet');
+    }
+
+    // 2. Tiroir Formulaire d'Ajout / Modification
+    function renderPresetGallery() {
+      const gallery = document.getElementById('preset-gallery');
+      gallery.innerHTML = PRESET_CATEGORIES.map(cat => `
+        <button
+          type="button"
+          onclick="selectPresetImage('${cat.url}', '${cat.label}')"
+          class="group relative rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700 h-14 flex flex-col items-center justify-center focus:outline-none focus:ring-2 focus:ring-amberGold"
+        >
+          <img src="${cat.url}" alt="${cat.label}" class="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:scale-110 transition" />
+          <div class="absolute inset-0 bg-black/40"></div>
+          <span class="relative text-sm">${cat.emoji}</span>
+          <span class="relative text-[9px] font-bold text-white tracking-tight">${cat.label}</span>
+        </button>
+      `).join('');
+    }
+
+    function selectPresetImage(url, label) {
+      document.getElementById('form-image').value = url;
+      showToast(`Photo "${label}" sélectionnée 📸`, '📸');
+    }
+
+    function openFormSheet(editId = null) {
+      const titleEl = document.getElementById('form-sheet-title');
+      const form = document.getElementById('gift-form');
+      form.reset();
+
+      if (editId) {
+        const g = gifts.find(item => item.id === editId);
+        if (!g) return;
+        titleEl.textContent = 'Modifier le cadeau';
+        document.getElementById('form-id').value = g.id;
+        document.getElementById('form-title').value = g.title || '';
+        document.getElementById('form-price').value = g.price || '';
+        document.getElementById('form-occasion').value = g.occasion || 'noel';
+        document.getElementById('form-priority').value = String(g.priority || 3);
+        document.getElementById('form-recipient').value = g.recipient || 'Pour moi';
+        document.getElementById('form-store').value = g.store || '';
+        document.getElementById('form-url').value = g.url || '';
+        document.getElementById('form-image').value = g.image || '';
+        document.getElementById('form-notes').value = g.notes || '';
+      } else {
+        titleEl.textContent = 'Ajouter une idée cadeau';
+        document.getElementById('form-id').value = '';
+        document.getElementById('form-recipient').value = currentRecipient !== 'all' ? currentRecipient : 'Pour moi';
+        document.getElementById('form-priority').value = '3';
+      }
+
+      openSheetById('form-sheet');
+    }
+
+    function saveGiftForm(event) {
+      event.preventDefault();
+      const id = document.getElementById('form-id').value;
+      const title = document.getElementById('form-title').value.trim();
+      const price = parseFloat(document.getElementById('form-price').value) || 0;
+      const occasion = document.getElementById('form-occasion').value;
+      const priority = parseInt(document.getElementById('form-priority').value, 10) || 2;
+      const recipient = document.getElementById('form-recipient').value.trim() || 'Pour moi';
+      const store = document.getElementById('form-store').value.trim();
+      const url = document.getElementById('form-url').value.trim();
+      let image = document.getElementById('form-image').value.trim();
+      const notes = document.getElementById('form-notes').value.trim();
+
+      // Si aucune image n'est fournie, on attribue la première image esthétique par défaut
+      if (!image) {
+        image = PRESET_CATEGORIES[0].url;
+      }
+
+      if (id) {
+        const index = gifts.findIndex(g => g.id === id);
+        if (index !== -1) {
+          gifts[index] = {
+            ...gifts[index],
+            title,
+            price,
+            occasion,
+            priority,
+            recipient,
+            store,
+            url,
+            image,
+            notes
+          };
+        }
+        showToast('Cadeau mis à jour avec succès ✨', '✨');
+      } else {
+        const newGift = {
+          id: 'gift-' + Date.now(),
+          title,
+          price,
+          occasion,
+          priority,
+          recipient,
+          store,
+          url,
+          image,
+          notes,
+          reserved: false,
+          createdAt: Math.floor(Date.now() / 1000)
+        };
+        gifts.unshift(newGift);
+        showToast('Nouvelle idée ajoutée à votre liste 🎁', '🎁');
+      }
+
+      saveGiftsToStorage();
+      renderApp();
+      closeAllSheets();
+    }
+
+    function toggleReserveGift(giftId, reopenDetail = false) {
+      const g = gifts.find(item => item.id === giftId);
+      if (!g) return;
+      g.reserved = !g.reserved;
+      saveGiftsToStorage();
+      renderApp();
+      showToast(
+        g.reserved ? `« ${g.title.slice(0, 22)}… » marqué comme réservé ✓` : 'Remis comme disponible',
+        g.reserved ? '✓' : '🎁'
+      );
+      if (reopenDetail) {
+        openDetailSheet(giftId);
+      }
+    }
+
+    function deleteGift(giftId) {
+      gifts = gifts.filter(g => g.id !== giftId);
+      saveGiftsToStorage();
+      renderApp();
+      closeAllSheets();
+      showToast('Cadeau supprimé de la liste 🗑', '🗑');
+    }
+
+    // 3. Tiroir Occasions
+    function openOccasionsSheet() {
+      renderStats();
+      openSheetById('occasions-sheet');
+    }
+
+    // 4. Tiroir Personnes (Destinataires)
+    function openPeopleSheet() {
+      const container = document.getElementById('people-list-container');
+      const defaultPeople = ['Pour moi', 'Maman', 'Papa', 'Partenaire', 'Amis'];
+      const mapCounts = {};
+
+      defaultPeople.forEach(p => { mapCounts[p] = 0; });
+      gifts.forEach(g => {
+        const r = (g.recipient || 'Pour moi').trim();
+        mapCounts[r] = (mapCounts[r] || 0) + 1;
+      });
+
+      const allPeople = Object.keys(mapCounts);
+
+      let html = `
+        <button
+          onclick="setRecipientFilter('all'); closeAllSheets();"
+          class="p-4 rounded-2xl border text-left transition ${
+            currentRecipient === 'all'
+              ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-transparent'
+              : 'bg-cream dark:bg-obsidian border-zinc-200 dark:border-zinc-800'
+          }"
+        >
+          <div class="text-lg mb-1">🌟</div>
+          <div class="font-bold text-xs">Tout le monde</div>
+          <div class="text-[11px] opacity-75">${gifts.length} idées au total</div>
+        </button>
+      `;
+
+      html += allPeople.map(person => {
+        const count = mapCounts[person] || 0;
+        const isSelected = currentRecipient.toLowerCase() === person.toLowerCase();
+        return `
+          <button
+            onclick="setRecipientFilter('${escapeHtml(person)}'); closeAllSheets();"
+            class="p-4 rounded-2xl border text-left transition ${
+              isSelected
+                ? 'bg-amberGold text-white border-transparent shadow-md'
+                : 'bg-cream dark:bg-obsidian border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white'
+            }"
+          >
+            <div class="text-lg mb-1">👤</div>
+            <div class="font-bold text-xs truncate">${escapeHtml(person)}</div>
+            <div class="text-[11px] opacity-75">${count} idée${count > 1 ? 's' : ''}</div>
+          </button>
+        `;
+      }).join('');
+
+      container.innerHTML = html;
+      openSheetById('people-sheet');
+    }
+
+    // 5. Tiroir GitHub Pages (Export 1-Clic)
+    function openGithubSheet() {
+      openSheetById('github-sheet');
+    }
+
+    function downloadUpdatedHtmlFile() {
+      try {
+        // Récupère le code source complet de la page et remplace le bloc INITIAL_GIFTS
+        // par la liste actuelle de l'utilisateur pour que le fichier téléchargé soit 100% autonome
+        const currentDocHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+        const startMarker = '/*__GIFTS_DATA_START__*/';
+        const endMarker = '/*__GIFTS_DATA_END__*/';
+
+        const startIdx = currentDocHtml.indexOf(startMarker);
+        const endIdx = currentDocHtml.indexOf(endMarker);
+
+        let updatedHtml = currentDocHtml;
+        if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+          const replacementBlock = `${startMarker}\n    const INITIAL_GIFTS = ${JSON.stringify(gifts, null, 6)};\n    `;
+          updatedHtml =
+            currentDocHtml.slice(0, startIdx) +
+            replacementBlock +
+            currentDocHtml.slice(endIdx);
+        }
+
+        const blob = new Blob([updatedHtml], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'index.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showToast('Fichier index.html généré et téléchargé ! 🚀', '🚀');
+      } catch (err) {
+        console.error(err);
+        showToast('Erreur lors de la génération du fichier.', '⚠️');
+      }
+    }
+
+    function copyGiftsJson() {
+      const jsonStr = JSON.stringify(gifts, null, 2);
+      const tempArea = document.createElement('textarea');
+      tempArea.value = jsonStr;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+      showToast('Bloc JSON copié dans le presse-papiers 📋', '📋');
+    }
+
+    function toggleImportJsonBox() {
+      const box = document.getElementById('import-json-box');
+      box.classList.toggle('hidden');
+    }
+
+    function importGiftsJson() {
+      const raw = document.getElementById('import-json-textarea').value.trim();
+      if (!raw) {
+        showToast('Veuillez coller un JSON valide.', '⚠️');
+        return;
+      }
+      try {
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) throw new Error('Format invalide');
+        gifts = parsed;
+        saveGiftsToStorage();
+        renderApp();
+        closeAllSheets();
+        showToast(`${gifts.length} cadeaux importés avec succès ! 🎉`, '🎉');
+      } catch (e) {
+        showToast('Format JSON non reconnu. Vérifiez votre copie.', '⚠️');
+      }
+    }
+
+    function resetToDemoGifts() {
+      localStorage.removeItem(STORAGE_KEY);
+      gifts = JSON.parse(JSON.stringify(INITIAL_GIFTS));
+      saveGiftsToStorage();
+      resetAllFilters();
+      closeAllSheets();
+      showToast('Exemples d\'origine restaurés ✨', '✨');
+    }
+
+    // -------------------------------------------------------------------------
+    // NOTIFICATION TOAST ÉLÉGANTE
+    // -------------------------------------------------------------------------
+    let toastTimeout = null;
+    function showToast(message, icon = '✨') {
+      const toast = document.getElementById('toast-notification');
+      document.getElementById('toast-message').textContent = message;
+      document.getElementById('toast-icon').textContent = icon;
+
+      toast.classList.remove('opacity-0', '-translate-y-4');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', '-translate-y-4');
+      }, 2800);
+    }
+  </script>
+
+</body></html>
