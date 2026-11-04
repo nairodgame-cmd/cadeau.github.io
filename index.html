@@ -168,14 +168,14 @@
         <!-- Choix de la personne -->
         <div>
           <label class="block text-[11px] font-bold text-zinc-500 dark:text-zinc-400 mb-1">Catégorie (Personne)</label>
-          <div id="modal-person-selector" class="grid grid-cols-4 gap-1.5"><button type="button" onclick="selectModalPerson('Dorian')" class="py-1.5 rounded-xl text-xs font-extrabold border transition bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent">Dorian</button><button type="button" onclick="selectModalPerson('Marie')" class="py-1.5 rounded-xl text-xs font-extrabold border transition bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white">Marie</button><button type="button" onclick="selectModalPerson('Ambre')" class="py-1.5 rounded-xl text-xs font-extrabold border transition bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent">Ambre</button><button type="button" onclick="selectModalPerson('Aliénor')" class="py-1.5 rounded-xl text-xs font-extrabold border transition bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent">Aliénor</button></div>
+          <div id="modal-person-selector" class="grid grid-cols-4 gap-1.5"><button type="button" onclick="selectModalPerson('Dorian')" class="py-1.5 rounded-xl text-xs font-extrabold border transition bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white">Dorian</button><button type="button" onclick="selectModalPerson('Marie')" class="py-1.5 rounded-xl text-xs font-extrabold border transition bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent">Marie</button><button type="button" onclick="selectModalPerson('Ambre')" class="py-1.5 rounded-xl text-xs font-extrabold border transition bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent">Ambre</button><button type="button" onclick="selectModalPerson('Aliénor')" class="py-1.5 rounded-xl text-xs font-extrabold border transition bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent">Aliénor</button></div>
         </div>
 
         <!-- Lien produit -->
         <div>
           <label class="block text-[11px] font-bold text-zinc-500 dark:text-zinc-400 mb-1">Lien du produit</label>
           <input id="gift-url-input" type="url" placeholder="https://..." oninput="handleUrlAutoFetch(this.value)" class="w-full px-3 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-medium focus:outline-none">
-          <p id="url-fetch-hint" class="text-[11px] text-zinc-500 mt-1">✓ Image récupérée automatiquement</p>
+          <p id="url-fetch-hint" class="text-[11px] text-zinc-500 mt-1">Aperçu bloqué par le marchand (utilisez le bouton 📷).</p>
         </div>
 
         <!-- Nom + Prix -->
@@ -195,7 +195,7 @@
           <label class="block text-[11px] font-bold text-zinc-500 dark:text-zinc-400 mb-1">Image (URL automatique ou photo)</label>
           <div class="flex items-center gap-2">
             <div class="w-12 h-12 rounded-xl bg-white border border-zinc-200 dark:border-zinc-700 p-1 flex items-center justify-center shrink-0 overflow-hidden">
-              <img id="gift-img-preview" src="https://media.dammann.fr/img/p/8/2/4/5/8245.jpg" alt="Aperçu" class="max-w-full max-h-full object-contain">
+              <img id="gift-img-preview" src="https://placehold.co/200x200/FFFFFF/3F3F46?text=Photo" alt="Aperçu" class="max-w-full max-h-full object-contain">
             </div>
             <input id="gift-image-input" type="text" placeholder="URL de l'image..." oninput="updateModalImagePreview(this.value)" class="flex-1 px-3 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs focus:outline-none">
             <button type="button" onclick="document.getElementById('gift-file-input').click()" class="px-3 py-2 rounded-xl bg-zinc-200 dark:bg-zinc-700 text-xs font-bold shrink-0">
@@ -394,6 +394,14 @@
       "price": "25 €",
       "url": "https://www.dammann.fr/fr/coffret-iconic-assortiment-de-thes-iconiques-20-sachets.html",
       "image": "https://media.dammann.fr/img/p/8/2/4/5/8245.jpg"
+    },
+    {
+      "id": "gift-1793827667830",
+      "person": "Dorian",
+      "title": "Trotinnette",
+      "price": "25 €",
+      "url": "https://www.decathlon.fr/p/trottinette-enfant-3-roues-btwin-b100-bleue/351455/c382c289m8938891",
+      "image": ""
     }
   ]
 }
