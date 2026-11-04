@@ -160,7 +160,7 @@
   <div id="gift-modal-backdrop" class="modal-backdrop fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div id="gift-modal-panel" class="modal-panel w-full max-w-md rounded-t-[26px] sm:rounded-[26px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 shadow-2xl max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between mb-3.5">
-        <h3 id="gift-modal-title" class="text-base font-extrabold">Ajouter un cadeau</h3>
+        <h3 id="gift-modal-title" class="text-base font-extrabold">Modifier le cadeau</h3>
         <button type="button" onclick="closeGiftModal()" class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xs font-bold">✕</button>
       </div>
 
@@ -168,14 +168,14 @@
         <!-- Choix de la personne -->
         <div>
           <label class="block text-[11px] font-bold text-zinc-500 dark:text-zinc-400 mb-1">Catégorie (Personne)</label>
-          <div id="modal-person-selector" class="grid grid-cols-4 gap-1.5"><button type="button" onclick="selectModalPerson('Dorian')" class="py-1.5 rounded-xl text-xs font-extrabold border transition bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white">Dorian</button><button type="button" onclick="selectModalPerson('Marie')" class="py-1.5 rounded-xl text-xs font-extrabold border transition bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent">Marie</button><button type="button" onclick="selectModalPerson('Ambre')" class="py-1.5 rounded-xl text-xs font-extrabold border transition bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent">Ambre</button><button type="button" onclick="selectModalPerson('Aliénor')" class="py-1.5 rounded-xl text-xs font-extrabold border transition bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent">Aliénor</button></div>
+          <div id="modal-person-selector" class="grid grid-cols-4 gap-1.5"><button type="button" onclick="selectModalPerson('Dorian')" class="py-1.5 rounded-xl text-xs font-extrabold border transition bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent">Dorian</button><button type="button" onclick="selectModalPerson('Marie')" class="py-1.5 rounded-xl text-xs font-extrabold border transition bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent">Marie</button><button type="button" onclick="selectModalPerson('Ambre')" class="py-1.5 rounded-xl text-xs font-extrabold border transition bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white">Ambre</button><button type="button" onclick="selectModalPerson('Aliénor')" class="py-1.5 rounded-xl text-xs font-extrabold border transition bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent">Aliénor</button></div>
         </div>
 
         <!-- Lien produit -->
         <div>
           <label class="block text-[11px] font-bold text-zinc-500 dark:text-zinc-400 mb-1">Lien du produit</label>
           <input id="gift-url-input" type="url" placeholder="https://..." oninput="handleUrlAutoFetch(this.value)" class="w-full px-3 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-medium focus:outline-none">
-          <p id="url-fetch-hint" class="text-[11px] text-zinc-500 mt-1">Aperçu bloqué par le marchand (utilisez le bouton 📷).</p>
+          <p id="url-fetch-hint" class="text-[11px] text-zinc-500 mt-1 hidden"></p>
         </div>
 
         <!-- Nom + Prix -->
@@ -397,8 +397,8 @@
     },
     {
       "id": "gift-1793827667830",
-      "person": "Dorian",
-      "title": "Trotinnette",
+      "person": "Ambre",
+      "title": "Trottinette",
       "price": "25 €",
       "url": "https://www.decathlon.fr/p/trottinette-enfant-3-roues-btwin-b100-bleue/351455/c382c289m8938891",
       "image": ""
